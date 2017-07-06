@@ -11,7 +11,7 @@ public class HjorthStatistics {
 
     public double getActivity(int indexOfWindow) {
         //DOCME: function (34)
-        ArrayList<SimpleAccelData> data = RMSFeature.shared.getAt(indexOfWindow);
+        ArrayList<SimpleAccelData> data = WindowData.window.getAt(indexOfWindow);
         if (data == null || data.size() < 1) return -1;
 
         double total = 0;
@@ -24,7 +24,7 @@ public class HjorthStatistics {
 
     public double getMobility(int indexOfWindow) {
         //DOCME: function (35)
-        ArrayList<SimpleAccelData> data = RMSFeature.shared.getAt(indexOfWindow);
+        ArrayList<SimpleAccelData> data = WindowData.window.getAt(indexOfWindow);
         if (data == null || data.size() < 2) return -1;
 
         double total = 0;
@@ -41,7 +41,7 @@ public class HjorthStatistics {
 
     public double getComplexity(int indexOfWindow) {
         //DOCME: function (36)
-        ArrayList<SimpleAccelData> data = RMSFeature.shared.getAt(indexOfWindow);
+        ArrayList<SimpleAccelData> data = WindowData.window.getAt(indexOfWindow);
         if (data == null || data.size() < 3) return -1;
 
         double total = 0;
@@ -66,7 +66,7 @@ public class HjorthStatistics {
     public ArrayList<Double> getAllValues(int indexOfWindow) {
         //DOCME: An array store values of function (34) (35) (36)
         ArrayList<Double> arrayValue = new ArrayList<>();
-        ArrayList<SimpleAccelData> data = RMSFeature.shared.getAt(indexOfWindow);
+        ArrayList<SimpleAccelData> data = WindowData.window.getAt(indexOfWindow);
         if (data == null || data.size() < 3) return arrayValue;
 
         double totalActivity = 0;

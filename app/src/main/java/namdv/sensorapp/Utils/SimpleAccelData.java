@@ -18,26 +18,16 @@ public class SimpleAccelData {
 
     public SimpleAccelData(String timestamp, String x, String y, String z) {
         this.timestamp = Float.parseFloat(timestamp);
-        
-        // change "," by "." for x, y, z
-            
-        		
         this.x = Double.parseDouble(x.replace(',', '.'));
         this.y = Double.parseDouble(y.replace(',', '.'));
         this.z = Double.parseDouble(z.replace(',', '.'));
     }
     public SimpleAccelData(float timestamp, Double x, Double y, Double z) {
         this.timestamp = timestamp;
-        
-        // change "," by "." for x, y, z
-            
-        		
         this.x = x;
         this.y = y;
         this.z = z;
-                
     }
-
    
     public float getTimestamp() {
         return timestamp;

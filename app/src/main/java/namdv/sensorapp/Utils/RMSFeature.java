@@ -1,6 +1,7 @@
 package namdv.sensorapp.Utils;
 
 import android.util.SparseArray;
+import android.view.Window;
 
 import java.util.ArrayList;
 
@@ -11,29 +12,10 @@ import java.util.ArrayList;
 public class RMSFeature {
     public static RMSFeature shared = new RMSFeature();
 
-    private SparseArray<ArrayList<SimpleAccelData>> windowData;
-
-    public RMSFeature() {
-        if (windowData == null) init();
-    }
-
-    private void init() {
-        windowData = new SparseArray<>();
-    }
-
-    public void add(ArrayList<SimpleAccelData> list) {
-        int appendIndex = windowData.size();
-        windowData.append(appendIndex, list);
-    }
-
-    public ArrayList<SimpleAccelData> getAt(int windowNum) {
-        return windowData.get(windowNum);
-    }
-
     public double getWindowsAvarageGravity(int r) {
         //DOCME: function (10)
         //TODO: Find out definition of 'r'
-        int numberOfWindows = windowData.size();
+        int numberOfWindows = WindowData.window.getSize();
         if (numberOfWindows == 0) return -1;
 
         int k = r - numberOfWindows + 1;
@@ -46,7 +28,7 @@ public class RMSFeature {
     }
 
     public double getAverageGravity(int index) {
-        ArrayList<SimpleAccelData> data = getAt(index);
+        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
         return MeanStatistic.shared.getMean(data);
     }
 
