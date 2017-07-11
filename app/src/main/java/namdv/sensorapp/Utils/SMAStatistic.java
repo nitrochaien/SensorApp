@@ -101,8 +101,21 @@ public class SMAStatistic {
         return total / (2 * windowWidth);
     }
 
-    public double getDSVM() {
+    public double getDSVM(ArrayList<SimpleAccelData> data) {
         //DOCME: function (33)
-        return -1;
+        if (data == null ||  data.size() < 1) return -1;
+
+        double total = 0;
+        for (int i = 1; i < data.size(); i++) {
+            SimpleAccelData item = data.get(i);
+            SimpleAccelData item_1 = data.get(i - 1);
+            double ax = Math.abs(item.getX() - item_1.getX());
+            double ay = Math.abs(item.getY() - item_1.getY());
+            double az = Math.abs(item.getZ() - item_1.getZ());
+
+            total += ax + ay + az;
+        }
+
+        return total / data.size();
     }
 }
