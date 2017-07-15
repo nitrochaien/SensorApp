@@ -14,7 +14,7 @@ public class RMSFeature {
 
     public double getWindowsAvarageGravity(int r) {
         //DOCME: function (10)
-        //TODO: Find out definition of 'r'
+        //r = current window index
         int numberOfWindows = WindowData.window.getSize();
         if (numberOfWindows == 0) return -1;
 
