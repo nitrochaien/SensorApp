@@ -40,6 +40,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         defineTextView();
         defineButton();
         defineFileUtils();
+
+        /*TODO:
+        * Create a new MainActivity to read sample data - check
+        * Find how to read files
+        * Read values
+        * Calculate values
+        * Write to files */
     }
 
     private void defineSensor()

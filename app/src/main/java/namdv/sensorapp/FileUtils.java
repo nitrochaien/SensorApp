@@ -1,24 +1,16 @@
 package namdv.sensorapp;
 
-import android.content.Context;
-import android.graphics.PorterDuff;
 import android.os.Environment;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationHandler;
 
 /**
  * Created by namdv on 5/30/17.
@@ -27,7 +19,7 @@ import java.lang.reflect.InvocationHandler;
 public class FileUtils
 {
     private static final String RAW_DATA_FILE_NAME = "raw_data.txt";
-    private static final String MEDIUM_DATA_FILE_NAME = "medium_data.txt";
+    private static final String CALCULATE_DATA_TXT = "calculate_data.txt";
     private static final String FOLDER_NAME = "Acclerometer";
 
     public File getRawDataFile()
@@ -44,16 +36,20 @@ public class FileUtils
         return null;
     }
 
-    public File getMediumDataFile()
+    public File getSampleRawDataFile() {
+        return null;
+    }
+
+    public File getCalculatedDataFile()
     {
         File directory = getDirectoryFile();
         if (directory.isDirectory())
-            return new File(directory, MEDIUM_DATA_FILE_NAME);
+            return new File(directory, CALCULATE_DATA_TXT);
 
         boolean createdDirectory = directory.mkdirs();
         if (createdDirectory)
         {
-            return new File(directory, MEDIUM_DATA_FILE_NAME);
+            return new File(directory, CALCULATE_DATA_TXT);
         }
         return null;
     }
@@ -70,9 +66,9 @@ public class FileUtils
         writeToFile(textToWrite, file);
     }
 
-    public void writeToMediumDataFile(String textToWrite)
+    public void writeToCalculatedDataFile(String textToWrite)
     {
-        File file = getMediumDataFile();
+        File file = getCalculatedDataFile();
         writeToFile(textToWrite, file);
     }
 
@@ -92,15 +88,30 @@ public class FileUtils
         }
     }
 
+    private void writeFunctionResultToFile(String textToWrite) {
+        File file = getCalculatedDataFile();
+        if (file == null) return;
+
+        try {
+            FileWriter fileWriter = new FileWriter(file, true);
+            BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
+            writer.write(textToWrite);
+            writer.write("\t");
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public String getRawData()
     {
         File file = getRawDataFile();
         return getData(file);
     }
 
-    public String getMediumData()
+    public String getCalculatedData()
     {
-        File file = getMediumDataFile();
+        File file = getCalculatedDataFile();
         return getData(file);
     }
 

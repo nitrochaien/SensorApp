@@ -4,6 +4,7 @@
     <string name="stop">Stop</string>
     <string name="begin">Begin</string>
     <string name="get_info">Get Info</string>
+    <string name="calculate_fnc">Calculate Functions</string>
     <string name="x">X: </string>
     <string name="y">Y: </string>
     <string name="z">Z: </string>
