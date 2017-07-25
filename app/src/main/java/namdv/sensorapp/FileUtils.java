@@ -1,5 +1,7 @@
 package namdv.sensorapp;
 
+import android.content.Context;
+import android.content.res.AssetManager;
 import android.os.Environment;
 
 import java.io.BufferedReader;
@@ -11,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Created by namdv on 5/30/17.
@@ -18,38 +21,22 @@ import java.io.PrintWriter;
 
 public class FileUtils
 {
+    public static FileUtils fileUtils = new FileUtils();
+
     private static final String RAW_DATA_FILE_NAME = "raw_data.txt";
-    private static final String CALCULATE_DATA_TXT = "calculate_data.txt";
+    private static final String CALCULATE_DATA_FILE_NAME = "calculate_data.txt";
     private static final String FOLDER_NAME = "Acclerometer";
+    private static final String ACCEL_DATA_FILE_NAME = "accel_data.txt";
 
-    public File getRawDataFile()
-    {
+    private File getFile(String fileName) {
         File directory = getDirectoryFile();
         if (directory.isDirectory())
-            return new File(directory, RAW_DATA_FILE_NAME);
+            return new File(directory, fileName);
 
         boolean createdDirectory = directory.mkdirs();
         if (createdDirectory)
         {
-            return new File(directory, RAW_DATA_FILE_NAME);
-        }
-        return null;
-    }
-
-    public File getSampleRawDataFile() {
-        return null;
-    }
-
-    public File getCalculatedDataFile()
-    {
-        File directory = getDirectoryFile();
-        if (directory.isDirectory())
-            return new File(directory, CALCULATE_DATA_TXT);
-
-        boolean createdDirectory = directory.mkdirs();
-        if (createdDirectory)
-        {
-            return new File(directory, CALCULATE_DATA_TXT);
+            return new File(directory, fileName);
         }
         return null;
     }
@@ -62,13 +49,13 @@ public class FileUtils
 
     public void writeToRawDataFile(String textToWrite)
     {
-        File file = getRawDataFile();
+        File file = getFile(RAW_DATA_FILE_NAME);
         writeToFile(textToWrite, file);
     }
 
     public void writeToCalculatedDataFile(String textToWrite)
     {
-        File file = getCalculatedDataFile();
+        File file = getFile(CALCULATE_DATA_FILE_NAME);
         writeToFile(textToWrite, file);
     }
 
@@ -89,7 +76,7 @@ public class FileUtils
     }
 
     private void writeFunctionResultToFile(String textToWrite) {
-        File file = getCalculatedDataFile();
+        File file = getFile(CALCULATE_DATA_FILE_NAME);
         if (file == null) return;
 
         try {
@@ -105,14 +92,31 @@ public class FileUtils
 
     public String getRawData()
     {
-        File file = getRawDataFile();
+        File file = getFile(RAW_DATA_FILE_NAME);
         return getData(file);
     }
 
     public String getCalculatedData()
     {
-        File file = getCalculatedDataFile();
+        File file = getFile(CALCULATE_DATA_FILE_NAME);
         return getData(file);
+    }
+
+    public String getAccelData(Context context) {
+        AssetManager asset = context.getAssets();
+        try {
+            InputStream is = asset.open("accel_data.txt");
+            return convertStreamToString(is);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    private String convertStreamToString(InputStream is) {
+        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
     }
 
     private String getData(File file)
@@ -146,7 +150,7 @@ public class FileUtils
 
     public void clearAllRawData()
     {
-        File file = getRawDataFile();
+        File file = getFile(RAW_DATA_FILE_NAME);
         if (file == null)
             return;
 
