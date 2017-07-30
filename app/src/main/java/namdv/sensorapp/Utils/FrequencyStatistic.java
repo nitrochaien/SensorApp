@@ -188,6 +188,7 @@ public class FrequencyStatistic {
 
     public double getFourier(int windowIndex, String type) {
         //DOCME: function (37)
+        //DOCME: type = x | y | z | mean
         Complex[] fft = getFFT(windowIndex, type);
         double defaultFourier = getDefaultFourierValue(fft);
         return defaultFourier * WindowData.window.getHammingWindow(windowIndex);

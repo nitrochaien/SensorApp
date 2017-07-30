@@ -68,7 +68,8 @@ public class FileUtils
             FileWriter fileWriter = new FileWriter(file, true);
             BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
             writer.write(textToWrite);
-            writer.newLine();
+            writer.write(";");
+//            writer.newLine();
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();

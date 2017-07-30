@@ -12,4 +12,5 @@ public class SensorFunctions {
     public static RMSFeature rms = new RMSFeature();
     public static SMAStatistic sma = new SMAStatistic();
     public static VarianceStatistic variance = new VarianceStatistic();
+    public static RelativeFeatures relative = new RelativeFeatures();
 }
