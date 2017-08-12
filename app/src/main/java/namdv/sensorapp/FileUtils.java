@@ -68,7 +68,7 @@ public class FileUtils
             FileWriter fileWriter = new FileWriter(file, true);
             BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
             writer.write(textToWrite);
-            writer.write(";");
+            writer.write(",");
 //            writer.newLine();
             writer.close();
         } catch (IOException e) {
@@ -163,5 +163,59 @@ public class FileUtils
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void write(String meanX, String meanY, String meanZ, String meanXYZ,
+                      String averageGravity,
+                      String horizontalAccels, String verticalAccels,
+                      String RMS,
+                      String variance,
+                      String relative,
+                      String sma, String horizontalEnergy, String vectorSVM, String dsvm,
+                      String activity, String mobility, String complexity) {
+        writeToCalculatedDataFile(meanX);
+        writeToCalculatedDataFile(meanY);
+        writeToCalculatedDataFile(meanZ);
+        writeToCalculatedDataFile(meanXYZ);
+        writeToCalculatedDataFile(averageGravity);
+        writeToCalculatedDataFile(horizontalAccels);
+        writeToCalculatedDataFile(verticalAccels);
+        writeToCalculatedDataFile(RMS);
+        writeToCalculatedDataFile(variance);
+        writeToCalculatedDataFile(relative);
+        writeToCalculatedDataFile(sma);
+        writeToCalculatedDataFile(horizontalEnergy);
+        writeToCalculatedDataFile(vectorSVM);
+        writeToCalculatedDataFile(dsvm);
+        writeToCalculatedDataFile(activity);
+        writeToCalculatedDataFile(mobility);
+        writeToCalculatedDataFile(complexity);
+    }
+
+    public void write(String fourier,
+                      String xFFTEnergy, String yFFTEnergy, String zFFTEnergy,
+                      String xFFTEntropy, String yFFTEntropy, String zFFTEntropy,
+                      String devX, String devY, String devZ) {
+        writeToCalculatedDataFile(fourier);
+        writeToCalculatedDataFile(xFFTEnergy);
+        writeToCalculatedDataFile(yFFTEnergy);
+        writeToCalculatedDataFile(zFFTEnergy);
+        writeToCalculatedDataFile(xFFTEntropy);
+        writeToCalculatedDataFile(yFFTEntropy);
+        writeToCalculatedDataFile(zFFTEntropy);
+        writeToCalculatedDataFile(devX);
+        writeToCalculatedDataFile(devY);
+        writeToCalculatedDataFile(devZ);
+    }
+
+    public void writeTitle() {
+        write("meanX", "meanY", "meanZ", "meanXYZ",
+                "averageGravity",
+                "horizontalAccels", "verticalAccels",
+                "RMS",
+                "variance",
+                "relative",
+                "sma", "horizontalEnergy", "vectorSVM", "dsvm",
+                "activity", "mobility", "complexity");
     }
 }

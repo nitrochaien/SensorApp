@@ -26,8 +26,7 @@ public class FrequencyStatistic {
         fastFT = new FastFourierTransformer(DftNormalization.STANDARD);
     }
 
-    private Complex[] getFFT(int windowIndex, String type) {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(windowIndex);
+    private Complex[] getFFT(ArrayList<SimpleAccelData> data, String type) {
         if (data == null || data.size() == 0) return new Complex[0];
         int length = data.size();
         if (type.equals(X)) {
@@ -65,8 +64,8 @@ public class FrequencyStatistic {
     }
 
     //DOCME: function (39), (40)
-    public double getXFFTEnergy(int windowIndex) {
-        Complex[] xFFT = getFFT(windowIndex, X);
+    public double getXFFTEnergy(ArrayList<SimpleAccelData> data) {
+        Complex[] xFFT = getFFT(data, X);
         int length = xFFT.length;
         if (length == 0) return -1;
 
@@ -77,8 +76,8 @@ public class FrequencyStatistic {
         return sumXFFEnergy/length;
     }
 
-    public double getYFFTEnergy(int windowIndex) {
-        Complex[] yFFT = getFFT(windowIndex, Y);
+    public double getYFFTEnergy(ArrayList<SimpleAccelData> data) {
+        Complex[] yFFT = getFFT(data, Y);
         int length = yFFT.length;
         if (length == 0) return -1;
 
@@ -89,8 +88,8 @@ public class FrequencyStatistic {
         return sumYFFEnergy/length;
     }
 
-    public double getZFFTEnergy(int windowIndex) {
-        Complex[] zFFT = getFFT(windowIndex, Z);
+    public double getZFFTEnergy(ArrayList<SimpleAccelData> data) {
+        Complex[] zFFT = getFFT(data, Z);
         int length = zFFT.length;
         if (length == 0) return -1;
 
@@ -101,8 +100,8 @@ public class FrequencyStatistic {
         return sumZFFEnergy/length;
     }
 
-    public double getMeanFFTEnergy(int windowIndex) {
-        Complex[] meanFFT = getFFT(windowIndex, MEAN);
+    public double getMeanFFTEnergy(ArrayList<SimpleAccelData> data) {
+        Complex[] meanFFT = getFFT(data, MEAN);
         int length = meanFFT.length;
         if (length == 0) return -1;
 
@@ -114,8 +113,8 @@ public class FrequencyStatistic {
     }
 
     //DOCME: function (41)
-    public double getXFFTEntropy(int windowIndex){
-        Complex[] xFFT = getFFT(windowIndex,X);
+    public double getXFFTEntropy(ArrayList<SimpleAccelData> data){
+        Complex[] xFFT = getFFT(data,X);
         int length = xFFT.length;
         if (length == 0) return -1;
         double sumXFFTComponents = 0;
@@ -132,8 +131,8 @@ public class FrequencyStatistic {
         return -(sumXFFTEntropy/length);
     }
 
-    public double getYFFTEntropy(int windowIndex){
-        Complex[] yFFT = getFFT(windowIndex,Y);
+    public double getYFFTEntropy(ArrayList<SimpleAccelData> data){
+        Complex[] yFFT = getFFT(data,Y);
         int length = yFFT.length;
         if (length == 0) return -1;
         double sumYFFTComponents = 0;
@@ -150,8 +149,8 @@ public class FrequencyStatistic {
         return -(sumYFFTEntropy/length);
     }
 
-    public double getZFFTEntropy(int windowIndex){
-        Complex[] zFFT = getFFT(windowIndex,Z);
+    public double getZFFTEntropy(ArrayList<SimpleAccelData> data){
+        Complex[] zFFT = getFFT(data, Z);
         int length = zFFT.length;
         if (length == 0) return -1;
         double sumZFFTComponents = 0;
@@ -168,8 +167,8 @@ public class FrequencyStatistic {
         return -(sumZFFTEntropy/length);
     }
 
-    public double getMeanFFTEntropy(int windowIndex){
-        Complex[] meanFFT = getFFT(windowIndex,MEAN);
+    public double getMeanFFTEntropy(ArrayList<SimpleAccelData> data){
+        Complex[] meanFFT = getFFT(data, MEAN);
         int length = meanFFT.length;
         if (length == 0) return -1;
         double sumMeanFFTComponents = 0;
@@ -189,7 +188,8 @@ public class FrequencyStatistic {
     public double getFourier(int windowIndex, String type) {
         //DOCME: function (37)
         //DOCME: type = x | y | z | mean
-        Complex[] fft = getFFT(windowIndex, type);
+        ArrayList<SimpleAccelData> data = WindowData.window.getAt(windowIndex);
+        Complex[] fft = getFFT(data, type);
         double defaultFourier = getDefaultFourierValue(fft);
         return defaultFourier * WindowData.window.getHammingWindow(windowIndex);
     }

@@ -9,9 +9,8 @@ import java.util.ArrayList;
 public class HjorthStatistics {
     public static HjorthStatistics shared = new HjorthStatistics();
 
-    public double getActivity(int indexOfWindow) {
+    public double getActivity(ArrayList<SimpleAccelData> data) {
         //DOCME: function (34)
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(indexOfWindow);
         if (data == null || data.size() < 1) return -1;
 
         double total = 0;
@@ -22,9 +21,8 @@ public class HjorthStatistics {
         return total / (data.size() - 1);
     }
 
-    public double getMobility(int indexOfWindow) {
+    public double getMobility(ArrayList<SimpleAccelData> data) {
         //DOCME: function (35)
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(indexOfWindow);
         if (data == null || data.size() < 2) return -1;
 
         double total = 0;
@@ -35,13 +33,12 @@ public class HjorthStatistics {
             total += Math.pow(d1, 2);
         }
         double m1 = total / (data.size() - 2);
-        double activityValue = getActivity(indexOfWindow);
+        double activityValue = getActivity(data);
         return activityValue > 0 ? Math.sqrt(m1 / activityValue) : -1;
     }
 
-    public double getComplexity(int indexOfWindow) {
+    public double getComplexity(ArrayList<SimpleAccelData> data) {
         //DOCME: function (36)
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(indexOfWindow);
         if (data == null || data.size() < 3) return -1;
 
         double total = 0;
@@ -58,15 +55,14 @@ public class HjorthStatistics {
         }
         double m1 = totalMobility / (data.size() - 2);
         double m2 = total / (data.size() - 3);
-        double mobilityValue = getMobility(indexOfWindow);
+        double mobilityValue = getMobility(data);
 
         return mobilityValue > 0 ? Math.sqrt(m2 / m1) : -1;
     }
 
-    public ArrayList<Double> getAllValues(int indexOfWindow) {
+    public ArrayList<Double> getAllValues(ArrayList<SimpleAccelData> data) {
         //DOCME: An array store values of function (34) (35) (36)
         ArrayList<Double> arrayValue = new ArrayList<>();
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(indexOfWindow);
         if (data == null || data.size() < 3) return arrayValue;
 
         double totalActivity = 0;

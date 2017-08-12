@@ -14,9 +14,8 @@ import java.util.ArrayList;
 public class NumericalIntegration {
     public static NumericalIntegration integration = new NumericalIntegration();
 
-    private ArrayList<Integer> getInterationCounts(int indexOfWindow) {
+    private ArrayList<Integer> getInterationCounts(ArrayList<SimpleAccelData> data) {
         ArrayList<Integer> values = new ArrayList<>();
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(indexOfWindow);
         if (data == null || data.isEmpty()) return values;
 
         int t1 = (int)data.get(0).getTimestamp();
@@ -27,8 +26,8 @@ public class NumericalIntegration {
     }
 
     //DOCME: Function (25)
-    public double getX(int indexOfWindow) {
-        ArrayList<Integer> interationValues = getInterationCounts(indexOfWindow);
+    public double getX(ArrayList<SimpleAccelData> data) {
+        ArrayList<Integer> interationValues = getInterationCounts(data);
         if (interationValues.size() < 2) return -1;
 
         int t1 = interationValues.get(0);
