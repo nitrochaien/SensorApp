@@ -218,4 +218,8 @@ public class FileUtils
                 "sma", "horizontalEnergy", "vectorSVM", "dsvm",
                 "activity", "mobility", "complexity");
     }
+
+    public void writeFourier() {
+
+    }
 }
