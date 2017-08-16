@@ -20,8 +20,8 @@ public class SensorFunctions {
     VarianceStatistic variance = new VarianceStatistic();
     RelativeFeatures relative = new RelativeFeatures();
 
-    public void saveMean() {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(0);
+    public void saveMean(int index) {
+        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
 
         double meanX = mean.getMeanX(data);
         System.out.print("meanX: " + meanX + "\n");
@@ -89,53 +89,53 @@ public class SensorFunctions {
         FileUtils.fileUtils.writeToCalculatedDataFile("" + devZ);
     }
 
-    public void saveGravity() {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(0);
+    public void saveGravity(int index) {
+        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
         double totalGravity = 0;
         for (SimpleAccelData acc : data) {
             double value = mean.getSquareRootXYZ(acc);
-            System.out.print("gravity value: " + value + "\n");
             totalGravity += value;
         }
         double averageGravity = data.size() == 0 ? 0 : totalGravity / data.size();
+        System.out.print("gravity value: " + averageGravity + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + averageGravity);
     }
 
-    public void saveAccels() {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(0);
+    public void saveAccels(int index) {
+        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
         double totalHorizontalAccels = 0;
         for (SimpleAccelData acc : data) {
             double horizontalAccel = rms.getHorizontalAcceleration(acc);
-            System.out.print("HorizontalAccel: " + horizontalAccel + "\n");
             totalHorizontalAccels += horizontalAccel;
         }
         double averageHorizontalAccels = data.size() == 0 ? 0 : totalHorizontalAccels / data.size();
+        System.out.print("HorizontalAccel: " + averageHorizontalAccels + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + averageHorizontalAccels);
 
         double totalVerticalAccels = 0;
         for (SimpleAccelData acc : data) {
             double verticalAccel = rms.getVerticalAcceleration(acc);
-            System.out.print("verticalAccel: " + verticalAccel + "\n");
             totalVerticalAccels += verticalAccel;
         }
         double averageVerticalAccels = data.size() == 0 ? 0 : totalVerticalAccels / data.size();
+        System.out.print("verticalAccel: " + averageVerticalAccels + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + averageVerticalAccels);
     }
 
-    public void saveRMS() {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(0);
+    public void saveRMS(int index) {
+        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
         double totalRMS = 0;
         for (int i = 0; i < data.size(); i++) {
             double RMS = rms.getRMS(data, i);
-            System.out.print("RMS: " + RMS + "\n");
             totalRMS += RMS;
         }
         double averageRMS = data.size() == 0 ? 0 : totalRMS / data.size();
+        System.out.print("RMS: " + averageRMS + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + averageRMS);
     }
 
-    public void saveVariance() {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(0);
+    public void saveVariance(int index) {
+        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
         double var = variance.getVariance(data);
         System.out.print("variance: " + var + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + var);
@@ -151,26 +151,26 @@ public class SensorFunctions {
         }
     }
 
-    public void saveHjorthFeatures() {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(0);
+    public void saveHjorthFeatures(int index) {
+        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
         double activity = hjorth.getActivity(data);
         double mobility = hjorth.getMobility(data);
         double complexity = hjorth.getComplexity(data);
         System.out.print("activity: " + activity + ", " + "mobility: " + mobility + ", " + "complexity: " + complexity + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + activity);
         FileUtils.fileUtils.writeToCalculatedDataFile("" + mobility);
-        FileUtils.fileUtils.writeToCalculatedDataFile("" + complexity);
+        FileUtils.fileUtils.writeLastData("" + complexity);
     }
 
-    public void saveRelativeFeature() {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(0);
+    public void saveRelativeFeature(int index) {
+        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
         double relaFeature = relative.getRelativeFeature(data);
         System.out.print("relaFeature: " + relaFeature + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + relaFeature);
     }
 
-    public void saveSMA() {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(0);
+    public void saveSMA(int index) {
+        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
 
         double SMA = sma.getSMA(data);
         System.out.print("sma: " + SMA + "\n");

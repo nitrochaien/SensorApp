@@ -70,8 +70,11 @@ public class FrequencyStatistic {
         if (length == 0) return -1;
 
         double sumXFFEnergy = 0;
-        for (int i = 0; i < length; i++){
-            sumXFFEnergy += xFFT[i].getReal()*xFFT[i].getReal();
+        for (int i = 0; i < length; i++)
+        {
+            double real = xFFT[i].getReal();
+            if (real < 0) real = 0;
+            sumXFFEnergy += real*real;
         }
         return sumXFFEnergy/length;
     }
@@ -83,7 +86,9 @@ public class FrequencyStatistic {
 
         double sumYFFEnergy = 0;
         for (int i = 0; i < length; i++){
-            sumYFFEnergy += yFFT[i].getReal()*yFFT[i].getReal();
+            double real = yFFT[i].getReal();
+            if (real < 0) real = 0;
+            sumYFFEnergy += real*real;
         }
         return sumYFFEnergy/length;
     }
@@ -95,7 +100,9 @@ public class FrequencyStatistic {
 
         double sumZFFEnergy = 0;
         for (int i = 0; i < length; i++){
-            sumZFFEnergy += zFFT[i].getReal()*zFFT[i].getReal();
+            double real = zFFT[i].getReal();
+            if (real < 0) real = 0;
+            sumZFFEnergy += real*real;
         }
         return sumZFFEnergy/length;
     }
@@ -107,7 +114,9 @@ public class FrequencyStatistic {
 
         double sumMeanFFEnergy = 0;
         for (int i = 0; i < length; i++) {
-            sumMeanFFEnergy += meanFFT[i].getReal()*meanFFT[i].getReal();
+            double real = meanFFT[i].getReal();
+            if (real < 0) real = 0;
+            sumMeanFFEnergy += real*real;
         }
         return sumMeanFFEnergy / length;
     }
@@ -119,13 +128,18 @@ public class FrequencyStatistic {
         if (length == 0) return -1;
         double sumXFFTComponents = 0;
         for (int i = 0; i < length; i++){
-            sumXFFTComponents += xFFT[i].getReal();
+            double real = xFFT[i].getReal();
+            if (real < 0) real = 0;
+            sumXFFTComponents += real;
         }
 
+        if (sumXFFTComponents == 0) return -1;
         double sumXFFTEntropy = 0;
         double pi;
         for (int i = 0; i < length; i++){
-            pi = xFFT[i].getReal() / sumXFFTComponents;
+            double real = xFFT[i].getReal();
+            if (real < 0) real = 0;
+            pi = real / sumXFFTComponents;
             sumXFFTEntropy += pi*Math.log(pi);
         }
         return -(sumXFFTEntropy/length);
@@ -137,13 +151,18 @@ public class FrequencyStatistic {
         if (length == 0) return -1;
         double sumYFFTComponents = 0;
         for (int i = 0; i < length; i++){
-            sumYFFTComponents += yFFT[i].getReal();
+            double real = yFFT[i].getReal();
+            if (real < 0) real = 0;
+            sumYFFTComponents += real;
         }
 
+        if (sumYFFTComponents == 0) return -1;
         double sumYFFTEntropy = 0;
         double pi;
         for (int i = 0; i < length; i++){
-            pi = yFFT[i].getReal() / sumYFFTComponents;
+            double real = yFFT[i].getReal();
+            if (real < 0) real = 0;
+            pi = real / sumYFFTComponents;
             sumYFFTEntropy += pi*Math.log(pi);
         }
         return -(sumYFFTEntropy/length);
@@ -155,13 +174,18 @@ public class FrequencyStatistic {
         if (length == 0) return -1;
         double sumZFFTComponents = 0;
         for (int i = 0; i < length; i++){
-            sumZFFTComponents += zFFT[i].getReal();
+            double real = zFFT[i].getReal();
+            if (real < 0) real = 0;
+            sumZFFTComponents += real;
         }
 
+        if (sumZFFTComponents == 0) return -1;
         double sumZFFTEntropy = 0;
         double pi;
         for (int i = 0; i < length; i++){
-            pi = zFFT[i].getReal() / sumZFFTComponents;
+            double real = zFFT[i].getReal();
+            if (real < 0) real = 0;
+            pi = real / sumZFFTComponents;
             sumZFFTEntropy += pi*Math.log(pi);
         }
         return -(sumZFFTEntropy/length);
@@ -176,10 +200,13 @@ public class FrequencyStatistic {
             sumMeanFFTComponents += meanFFT[i].getReal();
         }
 
+        if (sumMeanFFTComponents == 0) return -1;
         double sumMeanFFTEntropy = 0;
         double pi;
         for (int i = 0; i < length; i++){
-            pi = meanFFT[i].getReal() / sumMeanFFTComponents;
+            double real = meanFFT[i].getReal();
+            if (real < 0) real = 0;
+            pi = real / sumMeanFFTComponents;
             sumMeanFFTEntropy += pi*Math.log(pi);
         }
         return -(sumMeanFFTEntropy/length);

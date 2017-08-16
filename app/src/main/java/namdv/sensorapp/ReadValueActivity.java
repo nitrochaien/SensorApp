@@ -27,12 +27,18 @@ public class ReadValueActivity extends AppCompatActivity {
 
         initView();
         initData();
+
+        FileUtils.fileUtils.writeTitle();
     }
 
     private void initData() {
         String accelValue = FileUtils.fileUtils.getAccelData(this);
         String[] lines = accelValue.split("\n");
         saveData(lines);
+
+//        String gyroValue = FileUtils.fileUtils.getGyroData(this);
+//        String[] line = gyroValue.split("\n");
+//        saveData(line);
     }
 
     private void initView() {
@@ -58,15 +64,23 @@ public class ReadValueActivity extends AppCompatActivity {
     }
 
     private void calculateFunctions() {
-        FileUtils.fileUtils.writeTitle();
-        SensorFunctions.shared.saveMean();
-        SensorFunctions.shared.saveGravity();
-        SensorFunctions.shared.saveAccels();
-        SensorFunctions.shared.saveRMS();
-        SensorFunctions.shared.saveVariance();
-        SensorFunctions.shared.saveRelativeFeature();
-        SensorFunctions.shared.saveSMA();
-        SensorFunctions.shared.saveHjorthFeatures();
+        SensorFunctions.shared.saveMean(0);
+        SensorFunctions.shared.saveGravity(0);
+        SensorFunctions.shared.saveAccels(0);
+        SensorFunctions.shared.saveRMS(0);
+        SensorFunctions.shared.saveVariance(0);
+        SensorFunctions.shared.saveRelativeFeature(0);
+        SensorFunctions.shared.saveSMA(0);
+        SensorFunctions.shared.saveHjorthFeatures(0);
+
+//        SensorFunctions.shared.saveMean(1);
+//        SensorFunctions.shared.saveGravity(1);
+//        SensorFunctions.shared.saveAccels(1);
+//        SensorFunctions.shared.saveRMS(1);
+//        SensorFunctions.shared.saveVariance(1);
+//        SensorFunctions.shared.saveRelativeFeature(1);
+//        SensorFunctions.shared.saveSMA(1);
+//        SensorFunctions.shared.saveHjorthFeatures(1);
     }
 
     private void saveData(String[] input) {

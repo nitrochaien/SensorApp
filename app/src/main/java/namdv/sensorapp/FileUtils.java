@@ -26,10 +26,11 @@ public class FileUtils
     private static final String RAW_DATA_FILE_NAME = "raw_data.txt";
     private static final String CALCULATE_DATA_FILE_NAME = "calculate_data.txt";
     private static final String FOLDER_NAME = "Acclerometer";
-    private static final String ACCEL_DATA_FILE_NAME = "accel_data.txt";
 
     private File getFile(String fileName) {
-        File directory = getDirectoryFile();
+//        File directory = getDirectoryFile();
+        File directory = getDirectory();
+        if (!directory.exists())
         if (directory.isDirectory())
             return new File(directory, fileName);
 
@@ -38,6 +39,7 @@ public class FileUtils
         {
             return new File(directory, fileName);
         }
+        System.out.println("Cant write file");
         return null;
     }
 
@@ -45,6 +47,10 @@ public class FileUtils
     {
         File root = Environment.getExternalStorageDirectory();
         return new File(root.getAbsolutePath() + "/" + FOLDER_NAME);
+    }
+
+    private File getDirectory() {
+        return new File("/Users/apple/Downloads/Programming/SampleProjects/Android/MySensorApp/SensorApp/" + FOLDER_NAME);
     }
 
     public void writeToRawDataFile(String textToWrite)
@@ -59,6 +65,22 @@ public class FileUtils
         writeToFile(textToWrite, file);
     }
 
+    public void writeLastData(String textToWrite) {
+        File file = getFile(CALCULATE_DATA_FILE_NAME);
+        if (file == null)
+            return;
+        try
+        {
+            FileWriter fileWriter = new FileWriter(file, true);
+            BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
+            writer.append(textToWrite);
+            writer.newLine();
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void writeToFile(String textToWrite, File file)
     {
         if (file == null)
@@ -67,9 +89,8 @@ public class FileUtils
         {
             FileWriter fileWriter = new FileWriter(file, true);
             BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
-            writer.write(textToWrite);
-            writer.write(",");
-//            writer.newLine();
+            writer.append(textToWrite);
+            writer.append(",");
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -83,8 +104,8 @@ public class FileUtils
         try {
             FileWriter fileWriter = new FileWriter(file, true);
             BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
-            writer.write(textToWrite);
-            writer.write("\t");
+            writer.append(textToWrite);
+            writer.append("\t");
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -107,6 +128,18 @@ public class FileUtils
         AssetManager asset = context.getAssets();
         try {
             InputStream is = asset.open("accel_data.txt");
+            return convertStreamToString(is);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    public String getGyroData(Context context) {
+        AssetManager asset = context.getAssets();
+        try {
+            InputStream is = asset.open("gyro_data.txt");
             return convertStreamToString(is);
         } catch (IOException e)
         {
@@ -189,7 +222,7 @@ public class FileUtils
         writeToCalculatedDataFile(dsvm);
         writeToCalculatedDataFile(activity);
         writeToCalculatedDataFile(mobility);
-        writeToCalculatedDataFile(complexity);
+        writeLastData(complexity);
     }
 
     public void write(String fourier,
