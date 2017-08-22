@@ -24,7 +24,7 @@ public class FileUtils
     public static FileUtils fileUtils = new FileUtils();
 
     private static final String RAW_DATA_FILE_NAME = "raw_data.txt";
-    private static final String CALCULATE_DATA_FILE_NAME = "calculate_data.txt";
+    private static final String CALCULATE_DATA_FILE_NAME = "calculate_data.csv";
     private static final String FOLDER_NAME = "Acclerometer";
 
     private File getFile(String fileName) {
