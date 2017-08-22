@@ -28,8 +28,8 @@ public class FileUtils
     private static final String FOLDER_NAME = "Acclerometer";
 
     private File getFile(String fileName) {
-//        File directory = getDirectoryFile();
-        File directory = getDirectory();
+        File directory = getDirectoryFile();
+//        File directory = getDirectory();
         if (!directory.exists())
         if (directory.isDirectory())
             return new File(directory, fileName);
@@ -61,23 +61,62 @@ public class FileUtils
 
     public void writeToCalculatedDataFile(String textToWrite)
     {
-        File file = getFile(CALCULATE_DATA_FILE_NAME);
-        writeToFile(textToWrite, file);
+//        File file = getFile(CALCULATE_DATA_FILE_NAME);
+        File dir = getDirectoryFile();
+        if (dir.exists())
+        {
+            if (dir.isDirectory())
+            {
+                File file = new File(dir, CALCULATE_DATA_FILE_NAME);
+                writeToFile(textToWrite, file);
+            }
+        }
+        else {
+            boolean success = dir.mkdirs();
+            if (success)
+            {
+                File file = new File(dir, CALCULATE_DATA_FILE_NAME);
+                writeToFile(textToWrite, file);
+            }
+        }
     }
 
     public void writeLastData(String textToWrite) {
-        File file = getFile(CALCULATE_DATA_FILE_NAME);
-        if (file == null)
-            return;
-        try
+        File dir = getDirectoryFile();
+        File file = null;
+        if (dir.exists())
         {
-            FileWriter fileWriter = new FileWriter(file, true);
-            BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
-            writer.append(textToWrite);
-            writer.newLine();
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            if (dir.isDirectory())
+            {
+                file = new File(dir, CALCULATE_DATA_FILE_NAME);
+                try
+                {
+                    FileWriter fileWriter = new FileWriter(file, true);
+                    BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
+                    writer.append(textToWrite);
+                    writer.append("\n");
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        else {
+            boolean success = dir.mkdirs();
+            if (success)
+            {
+                file = new File(dir, CALCULATE_DATA_FILE_NAME);
+                try
+                {
+                    FileWriter fileWriter = new FileWriter(file, true);
+                    BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
+                    writer.append(textToWrite);
+                    writer.append("\n");
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -127,7 +166,7 @@ public class FileUtils
     public String getAccelData(Context context) {
         AssetManager asset = context.getAssets();
         try {
-            InputStream is = asset.open("accel_data.txt");
+            InputStream is = asset.open("01_04_2017_16_12_UserIDStarting_Admin_Bike_Dec_ROOT_ACCE_DATA.csv");
             return convertStreamToString(is);
         } catch (IOException e)
         {
@@ -238,7 +277,7 @@ public class FileUtils
         writeToCalculatedDataFile(zFFTEntropy);
         writeToCalculatedDataFile(devX);
         writeToCalculatedDataFile(devY);
-        writeToCalculatedDataFile(devZ);
+        writeLastData(devZ);
     }
 
     public void writeTitle() {
@@ -252,7 +291,11 @@ public class FileUtils
                 "activity", "mobility", "complexity");
     }
 
-    public void writeFourier() {
-
+    public void writeHeader(String id, String name, String vehicle, String status)
+    {
+        writeLastData(id);
+        writeLastData(name);
+        writeLastData(vehicle);
+        writeLastData(status);
     }
 }

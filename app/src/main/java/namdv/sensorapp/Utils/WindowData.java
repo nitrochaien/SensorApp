@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 public class WindowData {
     public static WindowData window = new WindowData();
+
     private SparseArray<ArrayList<SimpleAccelData>> windowData;
 
     public WindowData() {
@@ -85,5 +86,34 @@ public class WindowData {
 
         double cos = Math.cos((2*Math.PI*windowIndex) / (n - 1));
         return 0.54 - 0.46 * cos;
+    }
+
+    public void saveData(ArrayList<String> input) {
+        double frequency = 9;
+        double seconds = 1;
+        double numberOfInstancesPerWindow = frequency * seconds;
+        double count = 0;
+
+        while (count < input.size()) {
+            ArrayList<SimpleAccelData> data = new ArrayList<>();
+            for (int i = (int)count; i < count + numberOfInstancesPerWindow; i++) {
+                String line = input.get(i);
+                String[] element = line.split(";");
+                String timeStamp = element[0];
+                String x = element[1];
+                String y = element[2];
+                String z = element[3];
+
+//                System.out.println("Window Size: " + getSize());
+//                System.out.println("x:" + x);
+//                System.out.println("y:" + y);
+//                System.out.println("z:" + z);
+
+                SimpleAccelData acc = new SimpleAccelData(timeStamp, x, y, z);
+                data.add(acc);
+            }
+            WindowData.window.add(data);
+            count += numberOfInstancesPerWindow;
+        }
     }
 }
