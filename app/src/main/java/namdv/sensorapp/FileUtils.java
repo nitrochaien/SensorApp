@@ -1,8 +1,12 @@
 package namdv.sensorapp;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -69,6 +73,8 @@ public class FileUtils
             {
                 File file = new File(dir, CALCULATE_DATA_FILE_NAME);
                 writeToFile(textToWrite, file);
+            } else {
+                System.out.println("Not a directory");
             }
         }
         else {
@@ -77,13 +83,14 @@ public class FileUtils
             {
                 File file = new File(dir, CALCULATE_DATA_FILE_NAME);
                 writeToFile(textToWrite, file);
-            }
+            } else
+                System.out.println("Cant make directory");
         }
     }
 
     public void writeLastData(String textToWrite) {
         File dir = getDirectoryFile();
-        File file = null;
+        File file;
         if (dir.exists())
         {
             if (dir.isDirectory())
@@ -261,20 +268,22 @@ public class FileUtils
         writeToCalculatedDataFile(dsvm);
         writeToCalculatedDataFile(activity);
         writeToCalculatedDataFile(mobility);
-        writeLastData(complexity);
+        writeToCalculatedDataFile(complexity);
     }
 
     public void write(String fourier,
-                      String xFFTEnergy, String yFFTEnergy, String zFFTEnergy,
-                      String xFFTEntropy, String yFFTEntropy, String zFFTEntropy,
+                      String xFFTEnergy, String yFFTEnergy, String zFFTEnergy, String meanFFTEnergy,
+                      String xFFTEntropy, String yFFTEntropy, String zFFTEntropy, String meanFFTEntropy,
                       String devX, String devY, String devZ) {
         writeToCalculatedDataFile(fourier);
         writeToCalculatedDataFile(xFFTEnergy);
         writeToCalculatedDataFile(yFFTEnergy);
         writeToCalculatedDataFile(zFFTEnergy);
+        writeToCalculatedDataFile(meanFFTEnergy);
         writeToCalculatedDataFile(xFFTEntropy);
         writeToCalculatedDataFile(yFFTEntropy);
         writeToCalculatedDataFile(zFFTEntropy);
+        writeToCalculatedDataFile(meanFFTEntropy);
         writeToCalculatedDataFile(devX);
         writeToCalculatedDataFile(devY);
         writeLastData(devZ);
@@ -289,6 +298,13 @@ public class FileUtils
                 "relative",
                 "sma", "horizontalEnergy", "vectorSVM", "dsvm",
                 "activity", "mobility", "complexity");
+        writeFourierTitle();
+    }
+
+    private void writeFourierTitle() {
+        write("fourier", "xFFTEnergy", "yFFTEnergy", "zFFTEnergy", "meanFFTEnergy",
+                "xFFTEntropy", "yFFTEntropy", "zFFTEntropy", "meanFFTEntropy",
+                "devX", "devY", "devZ");
     }
 
     public void writeHeader(String id, String name, String vehicle, String status)

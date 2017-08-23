@@ -140,6 +140,7 @@ public class FrequencyStatistic {
             double real = xFFT[i].getReal();
             if (real < 0) real = 0;
             pi = real / sumXFFTComponents;
+            if (pi <= 0) pi = 1;
             sumXFFTEntropy += pi*Math.log(pi);
         }
         return -(sumXFFTEntropy/length);
@@ -163,6 +164,7 @@ public class FrequencyStatistic {
             double real = yFFT[i].getReal();
             if (real < 0) real = 0;
             pi = real / sumYFFTComponents;
+            if (pi <= 0) pi = 1;
             sumYFFTEntropy += pi*Math.log(pi);
         }
         return -(sumYFFTEntropy/length);
@@ -186,6 +188,7 @@ public class FrequencyStatistic {
             double real = zFFT[i].getReal();
             if (real < 0) real = 0;
             pi = real / sumZFFTComponents;
+            if (pi <= 0) pi = 1;
             sumZFFTEntropy += pi*Math.log(pi);
         }
         return -(sumZFFTEntropy/length);
@@ -207,6 +210,7 @@ public class FrequencyStatistic {
             double real = meanFFT[i].getReal();
             if (real < 0) real = 0;
             pi = real / sumMeanFFTComponents;
+            if (pi <= 0) pi = 1;
             sumMeanFFTEntropy += pi*Math.log(pi);
         }
         return -(sumMeanFFTEntropy/length);

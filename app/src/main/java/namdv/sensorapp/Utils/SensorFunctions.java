@@ -40,8 +40,8 @@ public class SensorFunctions {
         FileUtils.fileUtils.writeToCalculatedDataFile("" + meanXYZ);
     }
 
-    public void saveFourier() {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(0);
+    public void saveFourier(int index) {
+        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
 
         //function 37
         preDataProcessor(data);
@@ -62,6 +62,10 @@ public class SensorFunctions {
         System.out.print("zfftEnergy: " + zfftEnergy + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + zfftEnergy);
 
+        double meanfftEnergy = frequency.getMeanFFTEnergy(data);
+        System.out.print("meanfftEnergy: " + meanfftEnergy + "\n");
+        FileUtils.fileUtils.writeToCalculatedDataFile("" + meanfftEnergy);
+
         //function 41
         double xfftEntropy = frequency.getXFFTEntropy(data);
         System.out.print("xfftEntropy: " + xfftEntropy + "\n");
@@ -74,6 +78,10 @@ public class SensorFunctions {
         double zfftEntropy = frequency.getZFFTEntropy(data);
         System.out.print("zfftEntropy: " + zfftEntropy + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + zfftEntropy);
+
+        double meanfftEntropy = frequency.getMeanFFTEntropy(data);
+        System.out.print("meanfftEntropy: " + meanfftEntropy + "\n");
+        FileUtils.fileUtils.writeToCalculatedDataFile("" + meanfftEntropy);
 
         //function 42
         double devX = frequency.getStandardDeviationX(0);
@@ -191,15 +199,10 @@ public class SensorFunctions {
 
     void addZeroValues(ArrayList<SimpleAccelData> data, int newSize) {
         int numberOfZeros = newSize - data.size();
-        System.out.print("former data size: " + data.size() + "\n");
-        System.out.print("new size: " + newSize + "\n");
-
         for (int i = 0; i < numberOfZeros; i++) {
             SimpleAccelData acc = new SimpleAccelData("0","0","0","0");
             data.add(acc);
         }
-
-        System.out.print("new data size: " + data.size() + "\n");
     }
 
     int convertToNearestPowerOfTwo(int x) {
