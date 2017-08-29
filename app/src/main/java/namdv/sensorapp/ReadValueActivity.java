@@ -1,7 +1,6 @@
 package namdv.sensorapp;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -12,8 +11,10 @@ import android.widget.Button;
 
 import java.util.ArrayList;
 
-import namdv.sensorapp.Utils.SensorFunctions;
-import namdv.sensorapp.Utils.WindowData;
+import namdv.sensorapp.Utils.features.SensorFunctions;
+import namdv.sensorapp.Utils.data.WindowData;
+import namdv.sensorapp.Utils.file.FileUtils;
+import namdv.sensorapp.Utils.file.WekaUtils;
 
 /**
  * Created by namdv on 7/20/17.
@@ -30,9 +31,9 @@ public class ReadValueActivity extends AppCompatActivity {
 
         initView();
 
-        initData();
-        FileUtils.fileUtils.writeTitle();
-//        checkPermission();
+//        initData();
+//        FileUtils.fileUtils.writeTitle();
+        checkPermission();
     }
 
     private void initData() {
@@ -47,7 +48,7 @@ public class ReadValueActivity extends AppCompatActivity {
         String username = lines[1];
         String vehicle = lines[2];
         String status = lines[3];
-        FileUtils.fileUtils.writeHeader(userId, username, vehicle, status);
+        WindowData.window.saveHeader(userId, username, vehicle, status);
 
         //Get body
         ArrayList<String> body = new ArrayList<>();
@@ -55,11 +56,7 @@ public class ReadValueActivity extends AppCompatActivity {
         {
             body.add(lines[i]);
         }
-        WindowData.window.saveData(body);
-
-//        String gyroValue = FileUtils.fileUtils.getGyroData(this);
-//        String[] line = gyroValue.split("\n");
-//        saveData(line);
+        WindowData.window.saveData(body, 50);
     }
 
     private void initView() {
@@ -79,7 +76,7 @@ public class ReadValueActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                calculateFourier();
+                randomForest();
             }
         });
     }
@@ -147,12 +144,7 @@ public class ReadValueActivity extends AppCompatActivity {
                     initData();
                     FileUtils.fileUtils.writeTitle();
 
-                } else {
-
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
                 }
-                return;
             }
 
             // other 'case' lines to check for other
@@ -160,7 +152,7 @@ public class ReadValueActivity extends AppCompatActivity {
         }
     }
 
-    private void calculateFourier() {
-        SensorFunctions.shared.saveFourier(0);
+    private void randomForest() {
+        WekaUtils.shared.classifyByRandomForest(this);
     }
 }

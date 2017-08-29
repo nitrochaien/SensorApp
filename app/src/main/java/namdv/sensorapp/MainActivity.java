@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import namdv.sensorapp.Utils.file.FileUtils;
+
 public class MainActivity extends AppCompatActivity implements SensorEventListener, View.OnClickListener
 {
     private static String TAG = MainActivity.class.getSimpleName();
@@ -135,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     {
         if (v == btnGetInfo)
         {
-            getInfo();
+
         }
         else if (v == btnBegin)
         {
@@ -178,12 +180,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         String content = lastX + "\t" + lastY + "\t" + lastZ;
         fileUtils.writeToRawDataFile(content);
         Log.d(TAG, "Write: " + content);
-    }
-
-    private void getInfo()
-    {
-        Intent intent = new Intent(this, InfoActivity.class);
-        changeScreen(intent);
     }
 
     private void changeScreen(Intent intent)
