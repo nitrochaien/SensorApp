@@ -29,10 +29,10 @@ public class WekaUtils
 {
     public static WekaUtils shared = new WekaUtils();
 
-    public void classifyByRandomForest(Context context) {
+    public void classifyByRandomForest() {
         BufferedReader br;
         int numFolds = 10;
-        String root = Environment.getExternalStorageDirectory().getAbsolutePath() + "/calculate_data.arff";
+        String root = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + FileUtils.FOLDER_NAME + "/calculate_data.arff";
 
         try {
             br = new BufferedReader(new FileReader(root));

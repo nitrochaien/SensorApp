@@ -1,11 +1,15 @@
 package namdv.sensorapp;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -31,6 +35,7 @@ public class ReadValueActivity extends AppCompatActivity {
     Button btnCalFunc, btnCalGyro, btnCalFourier;
 
     private ArrayList<AccelData> accels = new ArrayList<>();
+    private ArrayList<AccelData> gyros = new ArrayList<>();
 
     private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
@@ -44,17 +49,24 @@ public class ReadValueActivity extends AppCompatActivity {
         checkPermission();
     }
 
-    private void getAssetsFiles() {
+    private void saveData() {
+        getAssetsFiles("Accel");
+        getAssetsFiles("Gyro");
+        System.out.println("Data saved!!!");
+    }
+
+    private void getAssetsFiles(String folderName) {
         try {
-            String[] list = getAssets().list("Accel");
+            String[] list = getAssets().list(folderName);
             for (String file : list) {
                 if (!file.contains(".csv"))
                     break;
-                if (file.equals("calculate_data.csv"))
-                    break;
-                String data = FileUtils.fileUtils.getAccelDataInFolder(this, "Accel", file);
+                String data = FileUtils.fileUtils.getAccelDataInFolder(this, folderName, file);
                 String[] dataLines = data.split("\n");
-                saveData(dataLines);
+                if (folderName.equals("Accel"))
+                    saveAccels(dataLines);
+                else if (folderName.equals("Gyro"))
+                    saveGyros(dataLines);
             }
         } catch (IOException e)
         {
@@ -62,11 +74,11 @@ public class ReadValueActivity extends AppCompatActivity {
         }
     }
 
-    private void saveData(String[] data) {
-        //Separate header
+    private AccelData getSingleRecord(String[] data) {
         if (data.length == 0)
-            return;
+            return new AccelData();
 
+        //Separate header
         String vehicle = data[2];
         String status = data[3];
 
@@ -81,7 +93,17 @@ public class ReadValueActivity extends AppCompatActivity {
         singleAccel.status = status;
         singleAccel.data = windowData;
 
-        accels.add(singleAccel);
+        return singleAccel;
+    }
+
+    private void saveAccels(String[] data) {
+        AccelData record = getSingleRecord(data);
+        accels.add(record);
+    }
+
+    private void saveGyros(String[] data) {
+        AccelData record = getSingleRecord(data);
+        gyros.add(record);
     }
 
     private void initView() {
@@ -117,17 +139,27 @@ public class ReadValueActivity extends AppCompatActivity {
     }
 
     private void convert() {
-        File root = Environment.getExternalStorageDirectory();
-        String rootPath = root.getAbsolutePath() + "/" + "calculate_data.arff";
+        //convert accel
+        File root1 = Environment.getExternalStorageDirectory();
+        String rootPath1 = root1.getAbsolutePath() + "/" + FileUtils.FOLDER_NAME + "/" + FileUtils.ACCEL_FUNCS_FILE_NAME_ARFF;
+        String[] inputs1 = new String[2];
+//        inputs1[0] = FileUtils.fileUtils.getAssetFilePath(this, FileUtils.ACCEL_FUNCS_FILE_NAME);
+        inputs1[0] = root1.getAbsolutePath() + "/" + FileUtils.FOLDER_NAME + "/" + FileUtils.ACCEL_FUNCS_FILE_NAME;
+        inputs1[1] = rootPath1;
+        CSV2Arff.shared.convert(inputs1);
 
-        String[] inputs = new String[2];
-        inputs[0] = FileUtils.fileUtils.getAssetFilePath(this, "calculate_data.csv");
-        inputs[1] = rootPath;
-
-        CSV2Arff.shared.convert(inputs);
+        //convert accel&gyro
+//        File root = Environment.getExternalStorageDirectory();
+//        String rootPath = root.getAbsolutePath() + "/" + FileUtils.ACCEL_AND_GYRO_FUNCS_FILE_NAME_ARFF;
+//        String[] inputs = new String[2];
+//        inputs[0] = FileUtils.fileUtils.getAssetFilePath(this, FileUtils.ACCEL_AND_GYRO_FUNCS_FILE_NAME);
+//        inputs[1] = rootPath;
+//        CSV2Arff.shared.convert(inputs);
     }
 
     private void calculateAccel() {
+        FileUtils.fileUtils.writeAccelTitle();
+
         for (AccelData accel : accels) {
             WindowData wd = accel.data;
             int count = wd.getSize();
@@ -138,21 +170,26 @@ public class ReadValueActivity extends AppCompatActivity {
                 SensorFunctions func = new SensorFunctions(vehicle, status);
                 ArrayList<SimpleAccelData> data = wd.getAt(i);
 
-                func.saveMean(data);
                 func.saveGravity(data);
                 func.saveAccels(data);
                 func.saveRMS(data);
-                func.saveVariance(data);
                 func.saveRelativeFeature(data);
                 func.saveSMA(data);
                 func.saveHjorthFeatures(data);
                 func.saveFourier(wd, i);
             }
         }
+        convert();
     }
 
     private void calculateGyro() {
-        for (AccelData accel : accels) {
+        FileUtils.fileUtils.writeAllTitles();
+
+        ArrayList<AccelData> allRecords = new ArrayList<>();
+        allRecords.addAll(gyros);
+        allRecords.addAll(accels);
+
+        for (AccelData accel : allRecords) {
             WindowData wd = accel.data;
             int count = wd.getSize();
             String status = accel.getStatus();
@@ -164,8 +201,16 @@ public class ReadValueActivity extends AppCompatActivity {
 
                 func.saveMean(data);
                 func.saveVariance(data);
+                func.saveGravity(data);
+                func.saveAccels(data);
+                func.saveRMS(data);
+                func.saveRelativeFeature(data);
+                func.saveSMA(data);
+                func.saveHjorthFeatures(data);
+                func.saveFourier(wd, i);
             }
         }
+        convert();
     }
 
     private void checkPermission() {
@@ -192,8 +237,7 @@ public class ReadValueActivity extends AppCompatActivity {
                 // result of the request.
             }
         } else {
-            getAssetsFiles();
-            FileUtils.fileUtils.writeTitle();
+            saveData();
         }
     }
 
@@ -209,8 +253,7 @@ public class ReadValueActivity extends AppCompatActivity {
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
 
-                    getAssetsFiles();
-                    FileUtils.fileUtils.writeTitle();
+                    saveData();
                 }
             }
 
@@ -220,7 +263,6 @@ public class ReadValueActivity extends AppCompatActivity {
     }
 
     private void randomForest() {
-        convert();
-        WekaUtils.shared.classifyByRandomForest(this);
+        WekaUtils.shared.classifyByRandomForest();
     }
 }
