@@ -29,6 +29,8 @@ public class SMAStatistic {
                     + Math.abs(a_1.getY()) + Math.abs(a.getY())
                     + Math.abs(a_1.getZ()) + Math.abs(a.getZ());
             double secondArg = a.getTimestamp() - a_1.getTimestamp();
+            if (secondArg == 0) secondArg = 1;
+
             total += firstArg * secondArg;
         }
         return 1 / (2*windowWidth) * total;
@@ -45,6 +47,7 @@ public class SMAStatistic {
             double av_1 = RMSFeature.shared.getVerticalAcceleration(item_1);
             double firstArg = Math.abs(av) + Math.abs(av_1);
             double secondArg = item.getTimestamp() - item_1.getTimestamp();
+            if (secondArg == 0) secondArg = 1;
 
             total += firstArg * secondArg;
         }
@@ -63,6 +66,7 @@ public class SMAStatistic {
             double av_1 = RMSFeature.shared.getHorizontalAcceleration(item_1);
             double firstArg = Math.abs(av) + Math.abs(av_1);
             double secondArg = item.getTimestamp() - item_1.getTimestamp();
+            if (secondArg == 0) secondArg = 1;
 
             total += firstArg * secondArg;
         }
@@ -97,6 +101,7 @@ public class SMAStatistic {
             double minus_a_i = a - a_i;
             double firstArg = Math.abs(minus_a_i + minus_a);
             double secondArg = data.get(i).getTimestamp() - data.get(i - 1).getTimestamp();
+            if (secondArg == 0) secondArg = 1;
 
             total += firstArg * secondArg;
         }

@@ -12,29 +12,20 @@ import namdv.sensorapp.Utils.data.WindowData;
 public class RMSFeature {
     public static RMSFeature shared = new RMSFeature();
 
-    public double getWindowsAvarageGravity(int r) {
-        //DOCME: function (10)
-        //r = current window index
-        int numberOfWindows = WindowData.window.getSize();
-        if (numberOfWindows == 0) return -1;
-
-        int k = r - numberOfWindows + 1;
-        double total = 0;
-        for (int i = k; i <= r; i++) {
-            double gravity = getAverageGravity(i);
-            total += gravity;
-        }
-        return total / numberOfWindows;
-    }
-
-    public double getAverageGravity(int index) {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
-        return MeanStatistic.shared.getMean(data);
-    }
-
-    public double getGravity(SimpleAccelData acc) {
-        return MeanStatistic.shared.getSquareRootXYZ(acc);
-    }
+//    public double getWindowsAvarageGravity(WindowData data) {
+//        //DOCME: function (10)
+//        //r = current window index
+//        int numberOfWindows = data.getSize();
+//        if (numberOfWindows == 0) return -1;
+//
+//        int k = -numberOfWindows + 1;
+//        double total = 0;
+//        for (int i = k; i <= 0; i++) {
+//            double gravity = getAverageGravity(data.getAt(i));
+//            total += gravity;
+//        }
+//        return total / numberOfWindows;
+//    }
 
     public double getHorizontalAcceleration(SimpleAccelData acc) {
         //DOCME: function (11)
@@ -43,9 +34,7 @@ public class RMSFeature {
 
     public double getVerticalAcceleration(SimpleAccelData acc) {
         //DOCME: function (12)
-        int r = 0;
-        double windowsAverageGravity = getWindowsAvarageGravity(r);
-        return acc.getZ() - windowsAverageGravity;
+        return acc.getZ();
     }
 
     public double getRMS(ArrayList<SimpleAccelData> data, int indexOfData) {

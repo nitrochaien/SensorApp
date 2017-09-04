@@ -4,7 +4,8 @@
     <string name="stop">Stop</string>
     <string name="begin">Begin</string>
     <string name="get_info">Get Info</string>
-    <string name="calculate_fnc">Calculate Functions</string>
+    <string name="calculate_fnc">Calculate Accel</string>
+    <string name="calculate_gyro">Calculate Gyro</string>
     <string name="calculate_fourier">Calculate Fourier</string>
     <string name="random_forest">Random Forest</string>
     <string name="x">X: </string>

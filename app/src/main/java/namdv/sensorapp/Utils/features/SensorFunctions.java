@@ -11,12 +11,8 @@ import weka.classifiers.trees.j48.Stats;
  * Created by namdv on 7/15/17.
  */
 
-public class SensorFunctions {
-    public static SensorFunctions shared = new SensorFunctions();
-
-    private String status = WindowData.window.getStatus();
-
-    FrequencyStatistic frequency = new FrequencyStatistic();
+public class SensorFunctions
+{
     HjorthStatistics hjorth = new HjorthStatistics();
     MeanStatistic mean = new MeanStatistic();
     NumericalIntegration numerical = new NumericalIntegration();
@@ -25,9 +21,15 @@ public class SensorFunctions {
     VarianceStatistic variance = new VarianceStatistic();
     RelativeFeatures relative = new RelativeFeatures();
 
-    public void saveMean(int index) {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
+    String vehicle;
+    String status;
 
+    public SensorFunctions(String vehicle, String status) {
+        this.vehicle = vehicle;
+        this.status = status;
+    }
+
+    public void saveMean(ArrayList<SimpleAccelData> data) {
         double meanX = mean.getMeanX(data);
         System.out.print("meanX: " + meanX + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + meanX);
@@ -45,12 +47,13 @@ public class SensorFunctions {
         FileUtils.fileUtils.writeToCalculatedDataFile("" + meanXYZ);
     }
 
-    public void saveFourier(int index) {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
+    public void saveFourier(WindowData wData, int index) {
+        ArrayList<SimpleAccelData> data = wData.getAt(index);
+        FrequencyStatistic frequency = new FrequencyStatistic(wData);
 
         //function 37
         preDataProcessor(data);
-        double fourier = frequency.getFourier(0,"x");
+        double fourier = frequency.getFourier(index,"x");
         System.out.print("fourier: " + fourier + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + fourier);
 
@@ -89,21 +92,20 @@ public class SensorFunctions {
         FileUtils.fileUtils.writeToCalculatedDataFile("" + meanfftEntropy);
 
         //function 42
-        double devX = frequency.getStandardDeviationX(0);
+        double devX = frequency.getStandardDeviationX(index);
         System.out.print("devX: " + devX + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + devX);
 
-        double devY = frequency.getStandardDeviationY(0);
+        double devY = frequency.getStandardDeviationY(index);
         System.out.print("devY: " + devY + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + devY);
 
-        double devZ = frequency.getStandardDeviationZ(0);
+        double devZ = frequency.getStandardDeviationZ(index);
         System.out.print("devZ: " + devZ + "\n");
-        FileUtils.fileUtils.writeLastData("" + devZ + "," + status);
+        FileUtils.fileUtils.writeLastData("" + devZ + "," + vehicle);
     }
 
-    public void saveGravity(int index) {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
+    public void saveGravity(ArrayList<SimpleAccelData> data) {
         double totalGravity = 0;
         for (SimpleAccelData acc : data) {
             double value = mean.getSquareRootXYZ(acc);
@@ -114,8 +116,7 @@ public class SensorFunctions {
         FileUtils.fileUtils.writeToCalculatedDataFile("" + averageGravity);
     }
 
-    public void saveAccels(int index) {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
+    public void saveAccels(ArrayList<SimpleAccelData> data) {
         double totalHorizontalAccels = 0;
         for (SimpleAccelData acc : data) {
             double horizontalAccel = rms.getHorizontalAcceleration(acc);
@@ -135,8 +136,7 @@ public class SensorFunctions {
         FileUtils.fileUtils.writeToCalculatedDataFile("" + averageVerticalAccels);
     }
 
-    public void saveRMS(int index) {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
+    public void saveRMS(ArrayList<SimpleAccelData> data) {
         double totalRMS = 0;
         for (int i = 0; i < data.size(); i++) {
             double RMS = rms.getRMS(data, i);
@@ -147,8 +147,7 @@ public class SensorFunctions {
         FileUtils.fileUtils.writeToCalculatedDataFile("" + averageRMS);
     }
 
-    public void saveVariance(int index) {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
+    public void saveVariance(ArrayList<SimpleAccelData> data) {
         double var = variance.getVariance(data);
         System.out.print("variance: " + var + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + var);
@@ -164,8 +163,7 @@ public class SensorFunctions {
         }
     }
 
-    public void saveHjorthFeatures(int index) {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
+    public void saveHjorthFeatures(ArrayList<SimpleAccelData> data) {
         double activity = hjorth.getActivity(data);
         double mobility = hjorth.getMobility(data);
         double complexity = hjorth.getComplexity(data);
@@ -175,16 +173,13 @@ public class SensorFunctions {
         FileUtils.fileUtils.writeToCalculatedDataFile("" + complexity);
     }
 
-    public void saveRelativeFeature(int index) {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
+    public void saveRelativeFeature(ArrayList<SimpleAccelData> data) {
         double relaFeature = relative.getRelativeFeature(data);
         System.out.print("relaFeature: " + relaFeature + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + relaFeature);
     }
 
-    public void saveSMA(int index) {
-        ArrayList<SimpleAccelData> data = WindowData.window.getAt(index);
-
+    public void saveSMA(ArrayList<SimpleAccelData> data) {
         double SMA = sma.getSMA(data);
         System.out.print("sma: " + SMA + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + SMA);
@@ -193,13 +188,21 @@ public class SensorFunctions {
         System.out.print("horizontal Energy: " + horizontalEnergy + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + horizontalEnergy);
 
+        double verticalEnergy = sma.getVerticalEnergy(data);
+        System.out.print("vertical Energy: " + verticalEnergy + "\n");
+        FileUtils.fileUtils.writeToCalculatedDataFile("" + verticalEnergy);
+
         double vectorSVM = sma.getVectorSVM(data);
         System.out.print("vector svm: " + vectorSVM + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + vectorSVM);
 
-        double dsvm = sma.getDSVMByRMS(data);
+        double dsvm = sma.getDSVM(data);
         System.out.print("dsvm: " + dsvm + "\n");
         FileUtils.fileUtils.writeToCalculatedDataFile("" + dsvm);
+
+        double dsvmByRMS = sma.getDSVMByRMS(data);
+        System.out.print("dsvmByRMS: " + dsvmByRMS + "\n");
+        FileUtils.fileUtils.writeToCalculatedDataFile("" + dsvmByRMS);
     }
 
     void addZeroValues(ArrayList<SimpleAccelData> data, int newSize) {

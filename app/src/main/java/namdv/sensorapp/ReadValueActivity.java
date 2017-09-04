@@ -3,16 +3,23 @@ package namdv.sensorapp;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
+import namdv.sensorapp.Utils.data.AccelData;
+import namdv.sensorapp.Utils.data.SimpleAccelData;
 import namdv.sensorapp.Utils.features.SensorFunctions;
 import namdv.sensorapp.Utils.data.WindowData;
+import namdv.sensorapp.Utils.file.CSV2Arff;
 import namdv.sensorapp.Utils.file.FileUtils;
 import namdv.sensorapp.Utils.file.WekaUtils;
 
@@ -21,42 +28,60 @@ import namdv.sensorapp.Utils.file.WekaUtils;
  */
 
 public class ReadValueActivity extends AppCompatActivity {
-    Button btnCalFunc, btnCalFourier;
+    Button btnCalFunc, btnCalGyro, btnCalFourier;
+
+    private ArrayList<AccelData> accels = new ArrayList<>();
+
+    private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_read_value);
-
         initView();
 
-//        initData();
-//        FileUtils.fileUtils.writeTitle();
         checkPermission();
     }
 
-    private void initData() {
-        String accelValue = FileUtils.fileUtils.getAccelData(this);
-        String[] lines = accelValue.split("\n");
+    private void getAssetsFiles() {
+        try {
+            String[] list = getAssets().list("Accel");
+            for (String file : list) {
+                if (!file.contains(".csv"))
+                    break;
+                if (file.equals("calculate_data.csv"))
+                    break;
+                String data = FileUtils.fileUtils.getAccelDataInFolder(this, "Accel", file);
+                String[] dataLines = data.split("\n");
+                saveData(dataLines);
+            }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
 
-        for (String line : lines)
-            System.out.println("Lines: " + line);
-
+    private void saveData(String[] data) {
         //Separate header
-        String userId = lines[0];
-        String username = lines[1];
-        String vehicle = lines[2];
-        String status = lines[3];
-        WindowData.window.saveHeader(userId, username, vehicle, status);
+        if (data.length == 0)
+            return;
+
+        String vehicle = data[2];
+        String status = data[3];
 
         //Get body
         ArrayList<String> body = new ArrayList<>();
-        for (int i = 5; i < lines.length; i++)
-        {
-            body.add(lines[i]);
-        }
-        WindowData.window.saveData(body, 50);
+        body.addAll(Arrays.asList(data).subList(5, data.length));
+        WindowData windowData = new WindowData();
+        windowData.saveData(body, 50);
+
+        AccelData singleAccel = new AccelData();
+        singleAccel.vehicle = vehicle;
+        singleAccel.status = status;
+        singleAccel.data = windowData;
+
+        accels.add(singleAccel);
     }
 
     private void initView() {
@@ -66,7 +91,7 @@ public class ReadValueActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                calculateFunctions();
+                calculateAccel();
             }
         });
 
@@ -79,31 +104,74 @@ public class ReadValueActivity extends AppCompatActivity {
                 randomForest();
             }
         });
+
+        btnCalGyro = (Button) findViewById(R.id.btnCalGyro);
+        btnCalGyro.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                calculateGyro();
+            }
+        });
     }
 
-    private void calculateFunctions() {
+    private void convert() {
+        File root = Environment.getExternalStorageDirectory();
+        String rootPath = root.getAbsolutePath() + "/" + "calculate_data.arff";
 
-        double count = WindowData.window.getSize();
+        String[] inputs = new String[2];
+        inputs[0] = FileUtils.fileUtils.getAssetFilePath(this, "calculate_data.csv");
+        inputs[1] = rootPath;
 
-        for (int i = 0; i < count; i++) {
-            SensorFunctions.shared.saveMean(i);
-            SensorFunctions.shared.saveGravity(i);
-            SensorFunctions.shared.saveAccels(i);
-            SensorFunctions.shared.saveRMS(i);
-            SensorFunctions.shared.saveVariance(i);
-            SensorFunctions.shared.saveRelativeFeature(i);
-            SensorFunctions.shared.saveSMA(i);
-            SensorFunctions.shared.saveHjorthFeatures(i);
-            SensorFunctions.shared.saveFourier(i);
+        CSV2Arff.shared.convert(inputs);
+    }
+
+    private void calculateAccel() {
+        for (AccelData accel : accels) {
+            WindowData wd = accel.data;
+            int count = wd.getSize();
+            String status = accel.getStatus();
+            String vehicle = accel.getVehicle();
+
+            for (int i = 0; i < count; i++) {
+                SensorFunctions func = new SensorFunctions(vehicle, status);
+                ArrayList<SimpleAccelData> data = wd.getAt(i);
+
+                func.saveMean(data);
+                func.saveGravity(data);
+                func.saveAccels(data);
+                func.saveRMS(data);
+                func.saveVariance(data);
+                func.saveRelativeFeature(data);
+                func.saveSMA(data);
+                func.saveHjorthFeatures(data);
+                func.saveFourier(wd, i);
+            }
+        }
+    }
+
+    private void calculateGyro() {
+        for (AccelData accel : accels) {
+            WindowData wd = accel.data;
+            int count = wd.getSize();
+            String status = accel.getStatus();
+            String vehicle = accel.getVehicle();
+
+            for (int i = 0; i < count; i++) {
+                SensorFunctions func = new SensorFunctions(vehicle, status);
+                ArrayList<SimpleAccelData> data = wd.getAt(i);
+
+                func.saveMean(data);
+                func.saveVariance(data);
+            }
         }
     }
 
     private void checkPermission() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            // Should we show an explanation?
+        int permissionCheck = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
 
@@ -117,15 +185,15 @@ public class ReadValueActivity extends AppCompatActivity {
 
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        1);
+                        MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
 
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE is an
                 // app-defined int constant. The callback method gets the
                 // result of the request.
-
-                initData();
-                FileUtils.fileUtils.writeTitle();
             }
+        } else {
+            getAssetsFiles();
+            FileUtils.fileUtils.writeTitle();
         }
     }
 
@@ -133,7 +201,7 @@ public class ReadValueActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
         switch (requestCode) {
-            case 1: {
+            case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -141,9 +209,8 @@ public class ReadValueActivity extends AppCompatActivity {
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
 
-                    initData();
+                    getAssetsFiles();
                     FileUtils.fileUtils.writeTitle();
-
                 }
             }
 
@@ -153,6 +220,7 @@ public class ReadValueActivity extends AppCompatActivity {
     }
 
     private void randomForest() {
+        convert();
         WekaUtils.shared.classifyByRandomForest(this);
     }
 }

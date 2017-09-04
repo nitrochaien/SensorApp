@@ -1,14 +1,25 @@
 package namdv.sensorapp.Utils.file;
 
 import android.content.Context;
+import android.os.Environment;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Random;
 
+import weka.attributeSelection.InfoGainAttributeEval;
+import weka.attributeSelection.Ranker;
 import weka.classifiers.Evaluation;
 import weka.classifiers.trees.RandomForest;
-import weka.core.Debug;
 import weka.core.Instances;
+import weka.core.converters.ArffLoader;
+import weka.filters.Filter;
+import weka.filters.supervised.attribute.AttributeSelection;
 
 /**
  * Created by namdv on 8/28/17.
@@ -21,29 +32,23 @@ public class WekaUtils
     public void classifyByRandomForest(Context context) {
         BufferedReader br;
         int numFolds = 10;
+        String root = Environment.getExternalStorageDirectory().getAbsolutePath() + "/calculate_data.arff";
+
         try {
-            br = new BufferedReader(new InputStreamReader(
-                    context.getAssets().open("01_04_2017_16_12_UserIDStarting_Admin_Bike_Dec_ROOT_ACCE_DATA.arff")));
+            br = new BufferedReader(new FileReader(root));
 
             Instances trainData = new Instances(br);
             trainData.setClassIndex(trainData.numAttributes() - 1);
-            br.close();
+
             RandomForest rf = new RandomForest();
-            rf.setNumTrees(100);
+            rf.setNumTrees(50);
 
             Evaluation evaluation = new Evaluation(trainData);
-            evaluation.crossValidateModel(rf, trainData, numFolds, new Debug.Random(1));
+            evaluation.crossValidateModel(rf, trainData, numFolds, new Random(1));
 
             System.out.println(evaluation.toSummaryString("\nResults\n======\n", true));
             System.out.println(evaluation.toClassDetailsString());
-            System.out.println("Results For Class -1- ");
-            System.out.println("Precision =  " + evaluation.precision(0));
-            System.out.println("Recall =  " + evaluation.recall(0));
-            System.out.println("F-measure =  " + evaluation.fMeasure(0));
-            System.out.println("Results For Class -2- ");
-            System.out.println("Precision =  " + evaluation.precision(1));
-            System.out.println("Recall =  " + evaluation.recall(1));
-            System.out.println("F-measure =  " + evaluation.fMeasure(1));
+            System.out.println(evaluation.toMatrixString());
         } catch (Exception e) {
             e.printStackTrace();
         }

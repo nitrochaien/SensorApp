@@ -8,13 +8,7 @@ import java.util.ArrayList;
  */
 
 public class WindowData {
-    public static WindowData window = new WindowData();
-
     private SparseArray<ArrayList<SimpleAccelData>> windowData;
-    private String id;
-    private String name;
-    private String vehicle;
-    private String status;
 
     public WindowData() {
         if (windowData == null) init();
@@ -116,21 +110,8 @@ public class WindowData {
                 SimpleAccelData acc = new SimpleAccelData(timeStamp, x, y, z);
                 data.add(acc);
             }
-            WindowData.window.add(data);
+            add(data);
             count += numberOfInstancesPerWindow;
         }
-    }
-
-    public void saveHeader(String id, String name, String vehicle, String status) {
-        this.id = id;
-        this.name = name;
-        this.vehicle = vehicle;
-        this.status = status;
-    }
-
-    public String getStatus() {
-        String[] split = status.split(":");
-        String info = split[1].trim();
-        return info;
     }
 }
