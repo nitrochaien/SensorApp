@@ -1,4 +1,4 @@
-package namdv.sensorapp;
+package namdv.sensorapp.modules;
 
 import android.Manifest;
 import android.content.DialogInterface;
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import namdv.sensorapp.R;
 import namdv.sensorapp.Utils.data.AccelData;
 import namdv.sensorapp.Utils.data.SimpleAccelData;
 import namdv.sensorapp.Utils.features.SensorFunctions;
@@ -138,25 +139,6 @@ public class ReadValueActivity extends AppCompatActivity {
         });
     }
 
-    private void convert() {
-        //convert accel
-        File root1 = Environment.getExternalStorageDirectory();
-        String rootPath1 = root1.getAbsolutePath() + "/" + FileUtils.FOLDER_NAME + "/" + FileUtils.ACCEL_FUNCS_FILE_NAME_ARFF;
-        String[] inputs1 = new String[2];
-//        inputs1[0] = FileUtils.fileUtils.getAssetFilePath(this, FileUtils.ACCEL_FUNCS_FILE_NAME);
-        inputs1[0] = root1.getAbsolutePath() + "/" + FileUtils.FOLDER_NAME + "/" + FileUtils.ACCEL_FUNCS_FILE_NAME;
-        inputs1[1] = rootPath1;
-        CSV2Arff.shared.convert(inputs1);
-
-        //convert accel&gyro
-//        File root = Environment.getExternalStorageDirectory();
-//        String rootPath = root.getAbsolutePath() + "/" + FileUtils.ACCEL_AND_GYRO_FUNCS_FILE_NAME_ARFF;
-//        String[] inputs = new String[2];
-//        inputs[0] = FileUtils.fileUtils.getAssetFilePath(this, FileUtils.ACCEL_AND_GYRO_FUNCS_FILE_NAME);
-//        inputs[1] = rootPath;
-//        CSV2Arff.shared.convert(inputs);
-    }
-
     private void calculateAccel() {
         FileUtils.fileUtils.writeAccelTitle();
 
@@ -179,7 +161,7 @@ public class ReadValueActivity extends AppCompatActivity {
                 func.saveFourier(wd, i);
             }
         }
-        convert();
+        WekaUtils.shared.convert();
     }
 
     private void calculateGyro() {
@@ -210,7 +192,7 @@ public class ReadValueActivity extends AppCompatActivity {
                 func.saveFourier(wd, i);
             }
         }
-        convert();
+        WekaUtils.shared.convert();
     }
 
     private void checkPermission() {

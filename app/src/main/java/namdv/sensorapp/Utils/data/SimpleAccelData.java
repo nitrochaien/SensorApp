@@ -30,6 +30,7 @@ public class SimpleAccelData {
         this.y = Double.parseDouble(y);
         this.z = Double.parseDouble(z);
     }
+
     public SimpleAccelData(float timestamp, Double x, Double y, Double z) {
         this.timestamp = timestamp;
         this.x = x;

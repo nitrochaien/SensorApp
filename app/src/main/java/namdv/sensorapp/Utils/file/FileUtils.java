@@ -25,8 +25,8 @@ import namdv.sensorapp.Utils.data.WindowData;
 public class FileUtils {
     public static FileUtils fileUtils = new FileUtils();
 
-    private static final String RAW_DATA_FILE_NAME = "raw_data.txt";
     public static final String ACCEL_FUNCS_FILE_NAME = "accel_funcs.csv";
+    public static final String RAW_FILE_NAME = "raw_file.csv";
     public static final String ACCEL_AND_GYRO_FUNCS_FILE_NAME = "accel_and_gyro_funcs.csv";
     public static final String ACCEL_FUNCS_FILE_NAME_ARFF = "accel_funcs.arff";
     public static final String ACCEL_AND_GYRO_FUNCS_FILE_NAME_ARFF = "accel_and_gyro_funcs.arff";
@@ -51,11 +51,6 @@ public class FileUtils {
         return new File(root.getAbsolutePath() + "/" + FOLDER_NAME);
     }
 
-    public void writeToRawDataFile(String textToWrite) {
-        File file = getFile(RAW_DATA_FILE_NAME);
-        fileWriter(textToWrite, file, false);
-    }
-
     private void writeToFile(String text, String fileName, boolean isLast) {
         File dir = getDirectoryFile();
         if (dir.exists()) {
@@ -78,6 +73,36 @@ public class FileUtils {
 
     public void writeToCalculatedDataFile(String textToWrite) {
         writeToFile(textToWrite, ACCEL_FUNCS_FILE_NAME, false);
+    }
+
+    public void writeToRawFile(String textToWrite) {
+        try {
+            File dir = getDirectoryFile();
+            if (dir.exists()) {
+                if (dir.isDirectory()) {
+                    File file = new File(dir, RAW_FILE_NAME);
+                    FileWriter fileWriter = new FileWriter(file, true);
+                    BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
+                    writer.append(textToWrite);
+                    writer.close();
+                } else {
+                    System.out.println("Not a directory");
+                }
+            }
+            else {
+                boolean success = dir.mkdirs();
+                if (success) {
+                    File file = new File(dir, RAW_FILE_NAME);
+                    FileWriter fileWriter = new FileWriter(file, true);
+                    BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
+                    writer.append(textToWrite);
+                    writer.close();
+                } else
+                    System.out.println("Cant make directory");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void writeLastData(String textToWrite) {
@@ -112,20 +137,6 @@ public class FileUtils {
     private String convertStreamToString(InputStream is) {
         java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
-    }
-
-    public void clearAllRawData() {
-        File file = getFile(RAW_DATA_FILE_NAME);
-        if (file == null)
-            return;
-
-        try {
-            PrintWriter writer = new PrintWriter(file);
-            writer.print("");
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private void writeFeaturesTitle() {
