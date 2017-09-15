@@ -32,20 +32,6 @@ public class FileUtils {
     public static final String ACCEL_AND_GYRO_FUNCS_FILE_NAME_ARFF = "accel_and_gyro_funcs.arff";
     public static final String FOLDER_NAME = "Accelerometer";
 
-    private File getFile(String fileName) {
-        File directory = getDirectoryFile();
-        if (!directory.exists()) {
-            if (directory.isDirectory())
-                return new File(directory, fileName);
-        }
-
-        boolean createdDirectory = directory.mkdirs();
-        if (createdDirectory) {
-            return new File(directory, fileName);
-        }
-        return null;
-    }
-
     private File getDirectoryFile() {
         File root = Environment.getExternalStorageDirectory();
         return new File(root.getAbsolutePath() + "/" + FOLDER_NAME);
@@ -134,6 +120,25 @@ public class FileUtils {
         }
     }
 
+    public String getRawData() {
+        File root = Environment.getExternalStorageDirectory();
+        String filePath = root.getAbsolutePath() + "/" + FileUtils.FOLDER_NAME + "/" + FileUtils.RAW_FILE_NAME;
+
+        String value = "";
+        File myFile = new File(filePath);
+        try {
+            FileInputStream fis = new FileInputStream(myFile);
+            byte[] dataArray = new byte[fis.available()];
+            while (fis.read(dataArray) != -1) {
+                value = new String(dataArray);
+            }
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return value;
+    }
+
     private String convertStreamToString(InputStream is) {
         java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
@@ -187,22 +192,5 @@ public class FileUtils {
         writeToCalculatedDataFile("variance");
 
         writeAccelTitle();
-    }
-
-    public String getAssetFilePath(Context context, String fileName) {
-        File f = new File(context.getCacheDir() + fileName);
-        if (!f.exists()) try {
-            InputStream is = context.getAssets().open(fileName);
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-
-            FileOutputStream fos = new FileOutputStream(f);
-            fos.write(buffer);
-            fos.close();
-        } catch (Exception e) { throw new RuntimeException(e); }
-
-        return f.getPath();
     }
 }

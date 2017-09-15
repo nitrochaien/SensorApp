@@ -7,6 +7,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -66,8 +67,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onClick(View v) {
         if (isCollectingData) {
             manager.unregisterListener(this);
-            btnCollectData.setText(R.string.collect_data);
-            tvStatus.setText("Done!");
+            continueHandleData();
         } else {
             model.writeHeader();
             Sensor sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -124,6 +124,57 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             // other 'case' lines to check for other
             // permissions this app might request
+        }
+    }
+
+    private void continueHandleData() {
+        new SaveDataTask().execute();
+    }
+
+    private class SaveDataTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params)
+        {
+            model.saveData();
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+            btnCollectData.setText(R.string.collect_data);
+            tvStatus.setText("Saving data...");
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid)
+        {
+            super.onPostExecute(aVoid);
+            new CalculateFunctionTask().execute();
+        }
+    }
+
+    private class CalculateFunctionTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params)
+        {
+            model.calculateFunctions();
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+            tvStatus.setText("Calculate functions...");
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid)
+        {
+            super.onPostExecute(aVoid);
+            tvStatus.setText("DONE!!!");
         }
     }
 }
