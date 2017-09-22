@@ -12,7 +12,7 @@ import namdv.sensorapp.Utils.data.SimpleAccelData;
 import namdv.sensorapp.Utils.data.WindowData;
 import namdv.sensorapp.Utils.features.SensorFunctions;
 import namdv.sensorapp.Utils.file.FileUtils;
-import namdv.sensorapp.Utils.file.WekaUtils;
+import namdv.sensorapp.Utils.WekaUtils;
 
 /**
  * Created by namdv on 9/11/17.
@@ -21,6 +21,9 @@ import namdv.sensorapp.Utils.file.WekaUtils;
 public class MainViewModel {
     private static final int FREQUENCY = 50;
     private ArrayList<AccelData> rawData = new ArrayList<>();
+
+    private String test = "";
+    private int count = 0;
 
     public void writeAcceleromterDataToFile(SensorEvent event) {
         if (isAccelerometer(event.sensor)) {
@@ -39,13 +42,8 @@ public class MainViewModel {
                     z + ";\n";
             System.out.println("Write data:" + writeData);
             FileUtils.fileUtils.writeToRawFile(writeData);
+            count++;
         }
-    }
-
-    public void saveData() {
-        String data = FileUtils.fileUtils.getRawData();
-        String[] split = data.split("\n");
-        saveRaw(split);
     }
 
     private void saveRaw(String[] data) {
@@ -76,8 +74,6 @@ public class MainViewModel {
     }
 
     public void calculateFunctions() {
-        FileUtils.fileUtils.writeAllTitles();
-
         for (AccelData accel : rawData) {
             WindowData wd = accel.data;
             int count = wd.getSize();

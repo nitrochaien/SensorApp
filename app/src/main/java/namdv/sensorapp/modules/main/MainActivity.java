@@ -16,7 +16,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.Date;
+
 import namdv.sensorapp.R;
+import namdv.sensorapp.Utils.WekaUtils;
+import namdv.sensorapp.Utils.data.SimpleAccelData;
+import namdv.sensorapp.Utils.data.WindowData;
+import namdv.sensorapp.Utils.features.FrequencyStatistic;
+import namdv.sensorapp.Utils.features.HjorthStatistics;
+import namdv.sensorapp.Utils.features.MeanStatistic;
+import namdv.sensorapp.Utils.features.RMSFeature;
+import namdv.sensorapp.Utils.features.RelativeFeatures;
+import namdv.sensorapp.Utils.features.SMAStatistic;
+import namdv.sensorapp.Utils.features.VarianceStatistic;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener, View.OnClickListener {
     private SensorManager manager;
@@ -28,6 +41,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     private MainViewModel model = new MainViewModel();
+
+    //test
+    int startIndex = 0;
+    int FREQUENCY = 64;
+    ArrayList<SimpleAccelData> currentList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,24 +74,137 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        model.writeAcceleromterDataToFile(event);
+        startIndex += FREQUENCY;
+        int currentSize = currentList.size();
+        if (startIndex < currentSize) {
+            String sFunction = calculateFunctions(currentList);
+            WekaUtils.shared.testModel(sFunction);
+            currentList.clear();
+        }
+
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            Date date = new Date();
+            Long diffTime = date.getTime();
+            float fTime = diffTime.floatValue();
+
+            String timeStamp = String.valueOf(fTime);
+            String x = String.valueOf(event.values[0]);
+            String y = String.valueOf(event.values[1]);
+            String z = String.valueOf(event.values[2]);
+
+            SimpleAccelData accelData = new SimpleAccelData(timeStamp, x, y, z);
+            currentList.add(accelData);
+        }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    public String calculateFunctions(ArrayList<SimpleAccelData> data) {
+        //mean
+        double meanX = MeanStatistic.shared.getMeanX(data);
+        double meanY = MeanStatistic.shared.getMeanY(data);
+        double meanZ = MeanStatistic.shared.getMeanZ(data);
+        double meanXYZ = MeanStatistic.shared.getMean(data);
+
+        //gravity
+        double totalGravity = 0;
+        for (SimpleAccelData acc : data) {
+            totalGravity += meanXYZ;
+        }
+        double averageGravity = data.size() == 0 ? 0 : totalGravity / data.size();
+
+        //accels
+        double totalHorizontalAccels = 0;
+        for (SimpleAccelData acc : data) {
+            double horizontalAccel = RMSFeature.shared.getHorizontalAcceleration(acc);
+            totalHorizontalAccels += horizontalAccel;
+        }
+        double averageHorizontalAccels = data.size() == 0 ? 0 : totalHorizontalAccels / data.size();
+
+        double totalVerticalAccels = 0;
+        for (SimpleAccelData acc : data) {
+            double verticalAccel = RMSFeature.shared.getVerticalAcceleration(acc);
+            totalVerticalAccels += verticalAccel;
+        }
+        double averageVerticalAccels = data.size() == 0 ? 0 : totalVerticalAccels / data.size();
+
+        //rms
+        double totalRMS = 0;
+        for (int i = 0; i < data.size(); i++) {
+            double RMS = RMSFeature.shared.getRMS(data, i);
+            totalRMS += RMS;
+        }
+        double averageRMS = data.size() == 0 ? 0 : totalRMS / data.size();
+
+        //variance
+        double variance = VarianceStatistic.shared.getVariance(data);
+
+        //hjorth
+        double activity = HjorthStatistics.shared.getActivity(data);
+        double mobility = HjorthStatistics.shared.getMobility(data);
+        double complexity = HjorthStatistics.shared.getComplexity(data);
+
+        //relative
+        double relative = RelativeFeatures.shared.getRelativeFeature(data);
+
+        //sma
+        double SMA = SMAStatistic.sma.getSMA(data);
+        double horizontalEnergy = SMAStatistic.sma.getHorizontalEnergy(data);
+        double verticalEnergy = SMAStatistic.sma.getVerticalEnergy(data);
+        double vectorSVM = SMAStatistic.sma.getVectorSVM(data);
+        double dsvm = SMAStatistic.sma.getDSVM(data);
+        double dsvmByRMS = SMAStatistic.sma.getDSVMByRMS(data);
+
+        //frequency
+        WindowData wData = new WindowData();
+        wData.add(data);
+        FrequencyStatistic frequency = new FrequencyStatistic(wData);
+        double fourier = frequency.getFourier(0,"x");
+        double xfftEnergy = frequency.getXFFTEnergy(data);
+        double yfftEnergy = frequency.getYFFTEnergy(data);
+        double zfftEnergy = frequency.getZFFTEnergy(data);
+        double meanfftEnergy = frequency.getMeanFFTEnergy(data);
+        double xfftEntropy = frequency.getXFFTEntropy(data);
+        double yfftEntropy = frequency.getYFFTEntropy(data);
+        double zfftEntropy = frequency.getZFFTEntropy(data);
+        double meanfftEntropy = frequency.getMeanFFTEntropy(data);
+        double devX = frequency.getStandardDeviationX(0);
+        double devY = frequency.getStandardDeviationY(0);
+        double devZ = frequency.getStandardDeviationZ(0);
+
+        return meanX + "," + meanY + "," + meanZ + "," + meanXYZ + "," +
+                variance + "," +
+                averageGravity + "," + averageHorizontalAccels + "," + averageVerticalAccels + "," +
+                averageRMS + "," +
+                relative + "," +
+                SMA + "," +
+                horizontalEnergy + "," + verticalEnergy + "," +
+                vectorSVM + "," +
+                dsvm + "," + dsvmByRMS + "," +
+                activity + "," + mobility + "," + complexity + "," +
+                fourier + "," +
+                xfftEnergy + "," + yfftEnergy + "," + zfftEnergy + "," + meanfftEnergy + "," +
+                xfftEntropy + "," + yfftEntropy + "," + zfftEntropy + "," + meanfftEntropy + "," +
+                devX + "," + devY + "," + devZ + "," + "?";
+
     }
 
     @Override
     public void onClick(View v) {
         if (isCollectingData) {
             manager.unregisterListener(this);
-            continueHandleData();
+            btnCollectData.setText(R.string.collect_data);
+            tvStatus.setText("STOPPED!!");
         } else {
-            model.writeHeader();
             Sensor sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             manager.registerListener(this, sensor, model.sensorDelay());
             btnCollectData.setText(R.string.stop);
-            tvStatus.setText("Collecting data...");
+            tvStatus.setText("Monitoring...");
+
+            new AnalyzeDataTask().execute();
         }
         isCollectingData = !isCollectingData;
     }
@@ -127,35 +258,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    private void continueHandleData() {
-        new SaveDataTask().execute();
-    }
-
-    private class SaveDataTask extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... params)
-        {
-            model.saveData();
-            return null;
-        }
-
-        @Override
-        protected void onPreExecute()
-        {
-            super.onPreExecute();
-            btnCollectData.setText(R.string.collect_data);
-            tvStatus.setText("Saving data...");
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid)
-        {
-            super.onPostExecute(aVoid);
-            new CalculateFunctionTask().execute();
-        }
-    }
-
-    private class CalculateFunctionTask extends AsyncTask<Void, Void, Void> {
+    private class AnalyzeDataTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params)
         {
@@ -167,14 +270,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         protected void onPreExecute()
         {
             super.onPreExecute();
-            tvStatus.setText("Calculate functions...");
         }
 
         @Override
         protected void onPostExecute(Void aVoid)
         {
             super.onPostExecute(aVoid);
-            tvStatus.setText("DONE!!!");
         }
     }
 }

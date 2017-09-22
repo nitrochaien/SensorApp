@@ -1,20 +1,14 @@
 package namdv.sensorapp.modules;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,19 +18,17 @@ import namdv.sensorapp.Utils.data.AccelData;
 import namdv.sensorapp.Utils.data.SimpleAccelData;
 import namdv.sensorapp.Utils.features.SensorFunctions;
 import namdv.sensorapp.Utils.data.WindowData;
-import namdv.sensorapp.Utils.file.CSV2Arff;
 import namdv.sensorapp.Utils.file.FileUtils;
-import namdv.sensorapp.Utils.file.WekaUtils;
+import namdv.sensorapp.Utils.WekaUtils;
 
 /**
  * Created by namdv on 7/20/17.
  */
 
 public class ReadValueActivity extends AppCompatActivity {
-    Button btnCalFunc, btnCalGyro, btnCalFourier;
+    Button btnCalFunc, btnCalFourier;
 
     private ArrayList<AccelData> accels = new ArrayList<>();
-    private ArrayList<AccelData> gyros = new ArrayList<>();
 
     private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
@@ -66,8 +58,6 @@ public class ReadValueActivity extends AppCompatActivity {
                 String[] dataLines = data.split("\n");
                 if (folderName.equals("Accel"))
                     saveAccels(dataLines);
-                else if (folderName.equals("Gyro"))
-                    saveGyros(dataLines);
             }
         } catch (IOException e)
         {
@@ -102,11 +92,6 @@ public class ReadValueActivity extends AppCompatActivity {
         accels.add(record);
     }
 
-    private void saveGyros(String[] data) {
-        AccelData record = getSingleRecord(data);
-        gyros.add(record);
-    }
-
     private void initView() {
         btnCalFunc = (Button) findViewById(R.id.btnCalFunc);
         btnCalFunc.setOnClickListener(new View.OnClickListener()
@@ -127,51 +112,12 @@ public class ReadValueActivity extends AppCompatActivity {
                 randomForest();
             }
         });
-
-        btnCalGyro = (Button) findViewById(R.id.btnCalGyro);
-        btnCalGyro.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                calculateGyro();
-            }
-        });
     }
 
     private void calculateAccel() {
         FileUtils.fileUtils.writeAccelTitle();
 
         for (AccelData accel : accels) {
-            WindowData wd = accel.data;
-            int count = wd.getSize();
-            String status = accel.getStatus();
-            String vehicle = accel.getVehicle();
-
-            for (int i = 0; i < count; i++) {
-                SensorFunctions func = new SensorFunctions(vehicle, status);
-                ArrayList<SimpleAccelData> data = wd.getAt(i);
-
-                func.saveGravity(data);
-                func.saveAccels(data);
-                func.saveRMS(data);
-                func.saveRelativeFeature(data);
-                func.saveSMA(data);
-                func.saveHjorthFeatures(data);
-                func.saveFourier(wd, i);
-            }
-        }
-        WekaUtils.shared.convert();
-    }
-
-    private void calculateGyro() {
-        FileUtils.fileUtils.writeAllTitles();
-
-        ArrayList<AccelData> allRecords = new ArrayList<>();
-        allRecords.addAll(gyros);
-        allRecords.addAll(accels);
-
-        for (AccelData accel : allRecords) {
             WindowData wd = accel.data;
             int count = wd.getSize();
             String status = accel.getStatus();

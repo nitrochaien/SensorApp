@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import namdv.sensorapp.Utils.file.FileUtils;
 import namdv.sensorapp.Utils.data.SimpleAccelData;
 import namdv.sensorapp.Utils.data.WindowData;
-import weka.classifiers.trees.j48.Stats;
 
 /**
  * Created by namdv on 7/15/17.
