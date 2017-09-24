@@ -8,9 +8,7 @@
  * 0989906612
  * on 01/03/2017.
  */
-package namdv.sensorapp.Utils.data;
-
-import org.apache.commons.math3.util.*;
+package namdv.sensorapp.utils.data;
 
 import java.util.regex.Pattern;
 

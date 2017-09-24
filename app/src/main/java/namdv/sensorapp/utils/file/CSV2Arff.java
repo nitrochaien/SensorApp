@@ -1,4 +1,4 @@
-package namdv.sensorapp.Utils.file;
+package namdv.sensorapp.utils.file;
 
 /**
  * Created by namdv on 9/3/17.
@@ -8,11 +8,7 @@ import weka.core.Instances;
 import weka.core.converters.ArffSaver;
 import weka.core.converters.CSVLoader;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.InputStreamReader;
 
 public class CSV2Arff {
     /**

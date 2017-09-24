@@ -1,4 +1,4 @@
-package namdv.sensorapp.Utils.file;
+package namdv.sensorapp.utils.file;
 
 import android.content.Context;
 import android.content.res.AssetManager;

@@ -1,10 +1,10 @@
-package namdv.sensorapp.Utils.features;
+package namdv.sensorapp.utils.features;
 
 import java.util.ArrayList;
 
-import namdv.sensorapp.Utils.file.FileUtils;
-import namdv.sensorapp.Utils.data.SimpleAccelData;
-import namdv.sensorapp.Utils.data.WindowData;
+import namdv.sensorapp.utils.file.FileUtils;
+import namdv.sensorapp.utils.data.SimpleAccelData;
+import namdv.sensorapp.utils.data.WindowData;
 
 /**
  * Created by namdv on 7/15/17.
