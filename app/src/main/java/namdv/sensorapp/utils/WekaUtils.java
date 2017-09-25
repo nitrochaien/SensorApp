@@ -1,5 +1,6 @@
 package namdv.sensorapp.utils;
 
+import android.content.Context;
 import android.os.Environment;
 
 import java.io.BufferedReader;
@@ -22,6 +23,7 @@ import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
+import weka.core.Utils;
 
 /**
  * Created by namdv on 8/28/17.
@@ -85,9 +87,13 @@ public class WekaUtils
             System.out.println("--------------------------");
             double[] value = new double[dataRaw.numAttributes()];
             for (int i = 0; i < split.length; i++) {
-                String val = split[i];
-                float in = isNumeric(val) ? Float.parseFloat(val) : 1;
-                value[i] = in;
+                if (i == split.length - 1) {
+                    value[i] = Utils.missingValue();
+                } else {
+                    String val = split[i];
+                    float in = isNumeric(val) ? Float.parseFloat(val) : 0;
+                    value[i] = in;
+                }
             }
             dataRaw.add(new DenseInstance(1.0, value));
 
@@ -98,21 +104,12 @@ public class WekaUtils
 
             Classifier cls = (RandomForest)SerializationHelper.read(modelPath);
 
-//            double predictValue = cls.classifyInstance(dataRaw.instance(0));
-//            String prediction = dataRaw.classAttribute().value((int)predictValue);
-//            System.out.println("The predicted value of instance " +
-//                    Integer.toString(0) +
-//                    ": " + prediction);
-
-            Evaluation evaluation = new Evaluation(dataRaw);
-            Random ran = new Random(1);
-            int numFolds = 10;
-            evaluation.crossValidateModel(cls, dataRaw, numFolds, ran);
-            evaluation.evaluateModel(cls, dataRaw);
-
-            System.out.println(evaluation.toSummaryString("\nResults\n======\n", true));
-            System.out.println(evaluation.toClassDetailsString());
-            System.out.println(evaluation.toMatrixString());
+            dataRaw.setClassIndex(dataRaw.numAttributes() - 1);
+            double predictValue = cls.classifyInstance(dataRaw.instance(0));
+            String prediction = dataRaw.classAttribute().value((int)predictValue);
+            System.out.println("The predicted value of instance " +
+                    Integer.toString(0) +
+                    ": " + prediction);
         } catch (Exception e)
         {
             e.printStackTrace();

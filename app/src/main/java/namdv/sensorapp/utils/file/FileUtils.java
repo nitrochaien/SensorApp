@@ -7,6 +7,7 @@ import android.os.Environment;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,9 +21,7 @@ public class FileUtils {
 
     public static final String ACCEL_FUNCS_FILE_NAME = "accel_funcs.csv";
     public static final String RAW_FILE_NAME = "raw_file.csv";
-    public static final String ACCEL_AND_GYRO_FUNCS_FILE_NAME = "accel_and_gyro_funcs.csv";
     public static final String ACCEL_FUNCS_FILE_NAME_ARFF = "accel_funcs.arff";
-    public static final String ACCEL_AND_GYRO_FUNCS_FILE_NAME_ARFF = "accel_and_gyro_funcs.arff";
     public static final String FOLDER_NAME = "Accelerometer";
 
     private File getDirectoryFile() {
@@ -185,5 +184,22 @@ public class FileUtils {
         writeToCalculatedDataFile("variance");
 
         writeAccelTitle();
+    }
+
+    public String getMyModelPath(Context context) {
+        File f = new File(context.getCacheDir() + "/my_model.model");
+        if (!f.exists()) try {
+            InputStream is = context.getAssets().open("my_model.model");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+
+            FileOutputStream fos = new FileOutputStream(f);
+            fos.write(buffer);
+            fos.close();
+
+        } catch (Exception e) { throw new RuntimeException(e); }
+        return f.getPath();
     }
 }
