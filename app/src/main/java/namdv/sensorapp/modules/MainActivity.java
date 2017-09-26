@@ -126,6 +126,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         windowIndex = 1;
         lastIndex = 0;
         windowList.clear();
+        WekaUtils.shared.resetPrediction();
         tvStatus.setText("STOPPED!!");
     }
 

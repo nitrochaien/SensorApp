@@ -114,8 +114,7 @@ public class TestModelHelper
     }
 
     public int sensorDelay() {
-//        return 1000 / FREQUENCY;
-        return 200;
+        return 1000 / FREQUENCY;
     }
 
     void preDataProcessor(ArrayList<SimpleAccelData> data) {

@@ -148,27 +148,8 @@ public class WekaUtils
         }
     }
 
-    public BufferedReader testData(String str) {
-        byte[] content = str.getBytes();
-        InputStream is = null;
-        BufferedReader bfReader = null;
-        try {
-            is = new ByteArrayInputStream(content);
-            bfReader = new BufferedReader(new InputStreamReader(is));
-            String temp;
-            while((temp = bfReader.readLine()) != null){
-                System.out.println(temp);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try{
-                if(is != null) is.close();
-            } catch (Exception ex){
-                ex.printStackTrace();
-            }
-        }
-        return bfReader;
+    public void resetPrediction() {
+        predictions.clear();
     }
 
     public ArrayList<Attribute> attributeSet() {
