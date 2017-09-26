@@ -11,6 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import namdv.sensorapp.utils.file.CSV2Arff;
@@ -36,6 +40,8 @@ public class WekaUtils
     String root = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + FileUtils.FOLDER_NAME;
     String arffPath = root + "/accel_funcs.arff";
     String modelPath = root + "/random_forest.model";
+
+    ArrayList<String> predictions = new ArrayList<>();
 
     public void createRandomForestModel() {
         BufferedReader br;
@@ -81,10 +87,10 @@ public class WekaUtils
                 return;
 
             Instances dataRaw = new Instances("accels_func", attributes, 0);
-            System.out.println("Before adding any instance");
-            System.out.println("--------------------------");
-            System.out.println(dataRaw);
-            System.out.println("--------------------------");
+//            System.out.println("Before adding any instance");
+//            System.out.println("--------------------------");
+//            System.out.println(dataRaw);
+//            System.out.println("--------------------------");
             double[] value = new double[dataRaw.numAttributes()];
             for (int i = 0; i < split.length; i++) {
                 if (i == split.length - 1) {
@@ -97,22 +103,48 @@ public class WekaUtils
             }
             dataRaw.add(new DenseInstance(1.0, value));
 
-            System.out.println("After adding a instance");
-            System.out.println("--------------------------");
-            System.out.println(dataRaw);
-            System.out.println("--------------------------");
+//            System.out.println("After adding a instance");
+//            System.out.println("--------------------------");
+//            System.out.println(dataRaw);
+//            System.out.println("--------------------------");
 
             Classifier cls = (RandomForest)SerializationHelper.read(modelPath);
-
             dataRaw.setClassIndex(dataRaw.numAttributes() - 1);
             double predictValue = cls.classifyInstance(dataRaw.instance(0));
             String prediction = dataRaw.classAttribute().value((int)predictValue);
             System.out.println("The predicted value of instance " +
                     Integer.toString(0) +
                     ": " + prediction);
+            predictions.add(prediction);
         } catch (Exception e)
         {
             e.printStackTrace();
+        }
+    }
+
+    public String getPrediction() {
+        Map<String, Integer> stringsCount = new HashMap<>();
+        for(String predict : predictions)
+        {
+            if (predict.length() > 0) {
+                predict = predict.toLowerCase();
+                Integer count = stringsCount.get(predict);
+                if(count == null) count = 0;
+                count++;
+                stringsCount.put(predict, count);
+            }
+        }
+        Map.Entry<String,Integer> mostRepeated = null;
+        for(Map.Entry<String, Integer> e: stringsCount.entrySet())
+        {
+            if(mostRepeated == null || mostRepeated.getValue()<e.getValue())
+                mostRepeated = e;
+        }
+        try {
+            return mostRepeated != null ? mostRepeated.getKey() : null;
+        } catch (NullPointerException e) {
+            System.out.println("Cannot find most popular value at the List. Maybe all strings are empty");
+            return "";
         }
     }
 

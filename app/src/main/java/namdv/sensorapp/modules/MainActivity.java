@@ -8,6 +8,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +19,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import namdv.sensorapp.R;
 import namdv.sensorapp.utils.WekaUtils;
@@ -31,17 +33,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private SensorManager manager;
 
     private Button button;
-    private TextView tvStatus;
+    private TextView tvStatus, tvResult;
     private State state;
 
     private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     private TestModelHelper testModel = new TestModelHelper();
     private CreateModelHelper createModel = new CreateModelHelper(this);
+    private String sFunction = "";
 
     //test
     int FREQUENCY = 50;
+    int windowIndex = 1;
+    int lastIndex = 0;
     ArrayList<SimpleAccelData> currentList = new ArrayList<>();
+    ArrayList<SimpleAccelData> windowList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         button = (Button) findViewById(R.id.btn);
         button.setOnClickListener(this);
         tvStatus = (TextView) findViewById(R.id.tv_status);
+        tvResult = (TextView) findViewById(R.id.tv_result);
     }
 
     private void initData() {
@@ -66,16 +73,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onSensorChanged(SensorEvent event) {
         int currentSize = currentList.size();
-        if (currentSize > FREQUENCY) {
-            manager.unregisterListener(MainActivity.this);
+        if (currentSize >= Integer.MAX_VALUE / 2) {
+            stopMonitoring();
+            return;
+        }
 
-            String sFunction = testModel.calculateFunctions(currentList);
-//            System.out.println("Generated String: " + sFunction);
-            WekaUtils.shared.testModel(sFunction);
-
-            tvStatus.setText("DONE!!\n");
-            state = State.STOPPED;
-            currentList.clear();
+        int newIndex = FREQUENCY * windowIndex;
+        if (currentSize > newIndex) {
+            windowList.clear();
+            windowList.addAll(currentList.subList(lastIndex, newIndex));
+            new MonitoringDataTask().execute();
         }
 
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -102,10 +109,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onClick(View v) {
         if (state == State.BEGIN) {
             new SaveDataTask().execute(createModel);
-        } else if (state == State.CREATED_MODEL) {
+        } else if (state == State.CREATED_MODEL || state == State.STOPPED) {
+            tvStatus.setText("Monitoring...");
             Sensor sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             manager.registerListener(this, sensor, testModel.sensorDelay());
+            state = State.MONITORING;
+        } else if (state == State.MONITORING) {
+            stopMonitoring();
+            state = State.STOPPED;
         }
+    }
+
+    private void stopMonitoring() {
+        manager.unregisterListener(MainActivity.this);
+        currentList.clear();
+        windowIndex = 1;
+        lastIndex = 0;
+        windowList.clear();
+        tvStatus.setText("STOPPED!!");
     }
 
     private void checkPermission() {
@@ -213,15 +234,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    private class TestModelTask extends AsyncTask <TestModelHelper, Void, Void>
-    {
+    private class MonitoringDataTask extends AsyncTask <Void, Void, Void> {
         @Override
-        protected Void doInBackground(TestModelHelper... params)
+        protected Void doInBackground(Void... params)
         {
-            TestModelHelper helper = params[0];
-            if (helper != null) {
-
-            }
+            WekaUtils.shared.testModel(sFunction);
             return null;
         }
 
@@ -229,17 +246,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         protected void onPreExecute()
         {
             super.onPreExecute();
-            tvStatus.setText("Testing...");
-            state = State.MONITORING;
+            manager.unregisterListener(MainActivity.this);
+            sFunction = testModel.calculateFunctions(windowList);
         }
 
         @Override
         protected void onPostExecute(Void aVoid)
         {
             super.onPostExecute(aVoid);
-            tvStatus.setText("DONE!!\n");
-            state = State.STOPPED;
-            currentList.clear();
+            tvResult.setText(WekaUtils.shared.getPrediction() + "" + windowIndex);
+            lastIndex = FREQUENCY * windowIndex;
+            windowIndex++;
+
+            if (state == State.STOPPED) {
+                return;
+            }
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    Sensor sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                    manager.registerListener(MainActivity.this, sensor, testModel.sensorDelay());
+                }
+            }, 100);
         }
     }
 }
