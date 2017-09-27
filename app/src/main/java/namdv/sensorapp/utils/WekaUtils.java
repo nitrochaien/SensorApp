@@ -104,9 +104,9 @@ public class WekaUtils
             dataRaw.add(new DenseInstance(1.0, value));
 
 //            System.out.println("After adding a instance");
-//            System.out.println("--------------------------");
-//            System.out.println(dataRaw);
-//            System.out.println("--------------------------");
+            System.out.println("--------------------------");
+            System.out.println(dataRaw);
+            System.out.println("--------------------------");
 
             Classifier cls = (RandomForest)SerializationHelper.read(modelPath);
             dataRaw.setClassIndex(dataRaw.numAttributes() - 1);

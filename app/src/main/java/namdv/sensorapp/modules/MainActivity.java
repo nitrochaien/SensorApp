@@ -9,6 +9,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -19,7 +20,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import namdv.sensorapp.R;
 import namdv.sensorapp.utils.WekaUtils;
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onSensorChanged(SensorEvent event) {
         int currentSize = currentList.size();
-        if (currentSize >= Integer.MAX_VALUE / 2) {
+        if (currentSize >= Integer.MAX_VALUE) {
             stopMonitoring();
             return;
         }
@@ -110,9 +110,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (state == State.BEGIN) {
             new SaveDataTask().execute(createModel);
         } else if (state == State.CREATED_MODEL || state == State.STOPPED) {
-            tvStatus.setText("Monitoring...");
-            Sensor sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            manager.registerListener(this, sensor, testModel.sensorDelay());
+            tvStatus.setText(R.string.monitoring);
+            tvResult.setVisibility(View.VISIBLE);
+            registerSensor();
             state = State.MONITORING;
         } else if (state == State.MONITORING) {
             stopMonitoring();
@@ -127,31 +127,25 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         lastIndex = 0;
         windowList.clear();
         WekaUtils.shared.resetPrediction();
-        tvStatus.setText("STOPPED!!");
+        tvStatus.setText(R.string.stopped);
+        tvResult.setVisibility(View.INVISIBLE);
+    }
+
+    private void registerSensor() {
+        Sensor sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        manager.registerListener(this, sensor, testModel.sensorDelay());
     }
 
     private void checkPermission() {
         int permissionCheck = ContextCompat.checkSelfPermission(this,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-            } else {
-
-                // No explanation needed, we can request the permission.
 
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                         MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
-
-                // MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
             }
         } else {
             initData();
@@ -160,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+                                           @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
                 // If request is cancelled, the result arrays are empty.
@@ -173,9 +167,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     initData();
                 }
             }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
 
@@ -195,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         protected void onPreExecute()
         {
             super.onPreExecute();
-            tvStatus.setText("Saving data... Please wait...");
+            tvStatus.setText(R.string.saving_data);
         }
 
         @Override
@@ -222,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         protected void onPreExecute()
         {
             super.onPreExecute();
-            tvStatus.setText("Creating model... Please wait...");
+            tvStatus.setText(R.string.creating_model);
         }
 
         @Override
@@ -230,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         {
             super.onPostExecute(aVoid);
             tvStatus.setText("Created model!!\n");
-            button.setText("Monitor data");
+            button.setText(R.string.monitor_data);
             state = State.CREATED_MODEL;
         }
     }
@@ -255,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         protected void onPostExecute(Void aVoid)
         {
             super.onPostExecute(aVoid);
-            tvResult.setText(WekaUtils.shared.getPrediction() + "" + windowIndex);
+            tvResult.setText("Attempts: " + windowIndex + "\n" + WekaUtils.shared.getPrediction());
             lastIndex = FREQUENCY * windowIndex;
             windowIndex++;
 
@@ -266,8 +257,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    Sensor sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-                    manager.registerListener(MainActivity.this, sensor, testModel.sensorDelay());
+                    registerSensor();
                 }
             }, 100);
         }
