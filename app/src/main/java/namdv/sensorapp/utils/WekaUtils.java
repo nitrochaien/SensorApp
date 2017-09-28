@@ -87,10 +87,6 @@ public class WekaUtils
                 return;
 
             Instances dataRaw = new Instances("accels_func", attributes, 0);
-//            System.out.println("Before adding any instance");
-//            System.out.println("--------------------------");
-//            System.out.println(dataRaw);
-//            System.out.println("--------------------------");
             double[] value = new double[dataRaw.numAttributes()];
             for (int i = 0; i < split.length; i++) {
                 if (i == split.length - 1) {
@@ -110,11 +106,10 @@ public class WekaUtils
 
             Classifier cls = (RandomForest)SerializationHelper.read(modelPath);
             dataRaw.setClassIndex(dataRaw.numAttributes() - 1);
+
             double predictValue = cls.classifyInstance(dataRaw.instance(0));
             String prediction = dataRaw.classAttribute().value((int)predictValue);
-            System.out.println("The predicted value of instance " +
-                    Integer.toString(0) +
-                    ": " + prediction);
+            System.out.println("The predicted value is: " + prediction);
             predictions.add(prediction);
         } catch (Exception e)
         {

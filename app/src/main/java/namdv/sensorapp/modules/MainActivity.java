@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -32,8 +33,9 @@ enum State {
 public class MainActivity extends AppCompatActivity implements SensorEventListener, View.OnClickListener {
     private SensorManager manager;
 
-    private Button button;
-    private TextView tvStatus, tvResult;
+    private Button btnCreateModel, btnStartMonitoringVehicle, btnStopMonitoringVehicle, btnStopMonitoringActivity;
+    private TextView tvStatusCreateModel, tvResultVehicle, tvResultActivity;
+    private LinearLayout layoutVehicle, layoutActivity;
     private State state;
 
     private static final int MY_PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
@@ -59,10 +61,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void initView() {
-        button = (Button) findViewById(R.id.btn);
-        button.setOnClickListener(this);
-        tvStatus = (TextView) findViewById(R.id.tv_status);
-        tvResult = (TextView) findViewById(R.id.tv_result);
+        btnCreateModel = (Button) findViewById(R.id.btn_create_model);
+        btnStartMonitoringVehicle = (Button) findViewById(R.id.btn_start_monitoring_vehicle);
+        btnStopMonitoringVehicle = (Button) findViewById(R.id.btn_stop_monitoring_vehicle);
+        btnStopMonitoringActivity = (Button) findViewById(R.id.btn_stop_monitoring_activity);
+        tvStatusCreateModel = (TextView) findViewById(R.id.tv_status_create_model);
+        tvResultVehicle = (TextView) findViewById(R.id.tv_result_vehicle);
+        tvResultActivity = (TextView) findViewById(R.id.tv_result_activity);
+        layoutVehicle = (LinearLayout) findViewById(R.id.layout_result_vehicle);
+        layoutActivity = (LinearLayout) findViewById(R.id.layout_result_activity);
+
+        btnCreateModel.setOnClickListener(this);
+        btnStartMonitoringVehicle.setOnClickListener(this);
+        btnStopMonitoringVehicle.setOnClickListener(this);
+        btnStopMonitoringActivity.setOnClickListener(this);
+
+        layoutVehicle.setVisibility(View.GONE);
+        layoutActivity.setVisibility(View.GONE);
     }
 
     private void initData() {
@@ -74,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onSensorChanged(SensorEvent event) {
         int currentSize = currentList.size();
         if (currentSize >= Integer.MAX_VALUE) {
-            stopMonitoring();
+            refreshData();
             return;
         }
 
@@ -122,13 +137,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void stopMonitoring() {
         manager.unregisterListener(MainActivity.this);
+        refreshData();
+        WekaUtils.shared.resetPrediction();
+        tvStatus.setText(R.string.stopped);
+        tvResult.setVisibility(View.INVISIBLE);
+    }
+
+    private void refreshData() {
         currentList.clear();
         windowIndex = 1;
         lastIndex = 0;
         windowList.clear();
-        WekaUtils.shared.resetPrediction();
-        tvStatus.setText(R.string.stopped);
-        tvResult.setVisibility(View.INVISIBLE);
     }
 
     private void registerSensor() {
@@ -247,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         {
             super.onPostExecute(aVoid);
             tvResult.setText("Attempts: " + windowIndex + "\n" + WekaUtils.shared.getPrediction());
-            lastIndex = FREQUENCY * windowIndex;
+            lastIndex = FREQUENCY * windowIndex / 2;
             windowIndex++;
 
             if (state == State.STOPPED) {
