@@ -1,4 +1,4 @@
-package namdv.sensorapp.Utils.data;
+package namdv.sensorapp.utils.data;
 
 import android.util.SparseArray;
 import java.util.ArrayList;

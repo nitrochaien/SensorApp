@@ -1,4 +1,4 @@
-package namdv.sensorapp.Utils.data;
+package namdv.sensorapp.utils.data;
 
 /**
  * Created by namdv on 9/3/17.

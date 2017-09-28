@@ -1,4 +1,4 @@
-package namdv.sensorapp.Utils.features;
+package namdv.sensorapp.utils.features;
 
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
@@ -8,8 +8,8 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.ArrayList;
 
-import namdv.sensorapp.Utils.data.SimpleAccelData;
-import namdv.sensorapp.Utils.data.WindowData;
+import namdv.sensorapp.utils.data.SimpleAccelData;
+import namdv.sensorapp.utils.data.WindowData;
 
 /**
  * Created by namdv on 7/7/17.
@@ -154,7 +154,6 @@ public class FrequencyStatistic {
             if (pi <= 0) pi = 1;
             sumXFFTEntropy += pi * Math.log(pi);
         }
-        System.out.println("sumXFFTentropy: " + sumXFFTEntropy);
         return -(sumXFFTEntropy/length);
     }
 

@@ -7,8 +7,13 @@
     <string name="calculate_fnc">Calculate Accel</string>
     <string name="calculate_gyro">Calculate Gyro</string>
     <string name="collect_data">Collect data</string>
+    <string name="monitoring">Monitoring…</string>
+    <string name="monitor_data">Monitor data</string>
+    <string name="stopped">Stopped!</string>
     <string name="calculate_fourier">Calculate Fourier</string>
     <string name="random_forest">Random Forest</string>
+    <string name="saving_data">Saving data… Please wait…</string>
+    <string name="creating_model">Creating model… Please wait…</string>
     <string name="x">X: </string>
     <string name="y">Y: </string>
     <string name="z">Z: </string>

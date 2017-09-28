@@ -11,7 +11,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".modules.main.MainActivity">
+        <activity android:name=".modules.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -19,13 +19,13 @@
         </activity>
         <activity android:name=".modules.ReadValueActivity"/>
 
-        <!--<activity android:name=".ReadValueActivity">-->
+        <!--<activity android:name=".modules.ReadValueActivity">-->
             <!--<intent-filter>-->
                 <!--<action android:name="android.intent.action.MAIN"/>-->
                 <!--<category android:name="android.intent.category.LAUNCHER"/>-->
             <!--</intent-filter>-->
         <!--</activity>-->
-        <!--<activity android:name=".MainActivity"/>-->
+        <!--<activity android:name=".modules.main.MainActivity"/>-->
     </application>
 
 </manifest>
