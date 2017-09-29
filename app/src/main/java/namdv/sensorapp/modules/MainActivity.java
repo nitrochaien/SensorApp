@@ -27,7 +27,10 @@ import namdv.sensorapp.utils.WekaUtils;
 import namdv.sensorapp.utils.data.SimpleAccelData;
 
 enum State {
-    BEGIN, CREATED_MODEL, MONITORING, STOPPED
+    BEGIN,
+    CREATING_MODEL, CREATED_MODEL,
+    MONITORING_VEHICLE, MONITORING_ACTIVITY,
+    STOPPED
 }
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener, View.OnClickListener {
@@ -78,6 +81,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         layoutVehicle.setVisibility(View.GONE);
         layoutActivity.setVisibility(View.GONE);
+
+        initTextViewStatusCreateModel();
+    }
+
+    private void initTextViewStatusCreateModel() {
+        
     }
 
     private void initData() {
@@ -122,13 +131,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onClick(View v) {
+        if (v == btnCreateModel)
+        {
+            if (state == State.BEGIN || state == State.CREATED_MODEL) {
+                state = State.CREATING_MODEL;
+                new SaveDataTask().execute(createModel);
+            }
+        }
+        else if (v == btnStartMonitoringVehicle)
+        {
+            //TODO: start monitoring
+        }
+        else if (v == btnStopMonitoringVehicle) {
+            //TODO: stop monitoring, show dialog
+        }
+        else if (v == btnStopMonitoringActivity) {
+            //TODO: stop monitoring
+        }
         if (state == State.BEGIN) {
-            new SaveDataTask().execute(createModel);
+
         } else if (state == State.CREATED_MODEL || state == State.STOPPED) {
-            tvStatus.setText(R.string.monitoring);
-            tvResult.setVisibility(View.VISIBLE);
+            tvResultVehicle.setText(R.string.monitoring);
             registerSensor();
-            state = State.MONITORING;
+            state = State.MONITORING_VEHICLE;
         } else if (state == State.MONITORING) {
             stopMonitoring();
             state = State.STOPPED;

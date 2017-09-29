@@ -39,7 +39,7 @@ public class WekaUtils
 
     String root = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + FileUtils.FOLDER_NAME;
     String arffPath = root + "/accel_funcs.arff";
-    String modelPath = root + "/random_forest.model";
+    String modelPath = root + "/model/random_forest.model";
 
     ArrayList<String> predictions = new ArrayList<>();
 

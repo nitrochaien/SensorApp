@@ -136,7 +136,12 @@ public class FileUtils {
         return s.hasNext() ? s.next() : "";
     }
 
-    private void writeFeaturesTitle() {
+    public void writeAllTitles() {
+        writeToCalculatedDataFile("meanX");
+        writeToCalculatedDataFile("meanY");
+        writeToCalculatedDataFile("meanZ");
+        writeToCalculatedDataFile("meanXYZ");
+        writeToCalculatedDataFile("variance");
         writeToCalculatedDataFile("averageGravity");
         writeToCalculatedDataFile("horizontalAccels");
         writeToCalculatedDataFile("verticalAccels");
@@ -151,9 +156,7 @@ public class FileUtils {
         writeToCalculatedDataFile("activity");
         writeToCalculatedDataFile("mobility");
         writeToCalculatedDataFile("complexity");
-    }
 
-    private void writeFourierTitle() {
         writeToCalculatedDataFile("fourier");
         writeToCalculatedDataFile("xFFTEnergy");
         writeToCalculatedDataFile("yFFTEnergy");
@@ -167,23 +170,7 @@ public class FileUtils {
         writeToCalculatedDataFile("devY");
         writeToCalculatedDataFile("devZ");
 
-        //vehicle
         writeLastData("vehicle");
-    }
-
-    public void writeAccelTitle() {
-        writeFeaturesTitle();
-        writeFourierTitle();
-    }
-
-    public void writeAllTitles() {
-        writeToCalculatedDataFile("meanX");
-        writeToCalculatedDataFile("meanY");
-        writeToCalculatedDataFile("meanZ");
-        writeToCalculatedDataFile("meanXYZ");
-        writeToCalculatedDataFile("variance");
-
-        writeAccelTitle();
     }
 
     public String getMyModelPath(Context context) {

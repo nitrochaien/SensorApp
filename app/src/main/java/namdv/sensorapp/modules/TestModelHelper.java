@@ -1,7 +1,6 @@
 package namdv.sensorapp.modules;
 
 import java.util.ArrayList;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import namdv.sensorapp.utils.data.SimpleAccelData;
 import namdv.sensorapp.utils.data.WindowData;
