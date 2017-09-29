@@ -12,6 +12,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 
+import namdv.sensorapp.Constant;
+
 /**
  * Created by namdv on 5/30/17.
  */
@@ -19,18 +21,12 @@ import java.io.InputStream;
 public class FileUtils {
     public static FileUtils fileUtils = new FileUtils();
 
-    public static final String ACCEL_FUNCS_FILE_NAME = "accel_funcs.csv";
-    public static final String RAW_FILE_NAME = "raw_file.csv";
-    public static final String ACCEL_FUNCS_FILE_NAME_ARFF = "accel_funcs.arff";
-    public static final String FOLDER_NAME = "Accelerometer";
-
-    private File getDirectoryFile() {
-        File root = Environment.getExternalStorageDirectory();
-        return new File(root.getAbsolutePath() + "/" + FOLDER_NAME);
+    public boolean createdModel() {
+        return new File(Constant.ROOT).exists();
     }
 
     private void writeToFile(String text, String fileName, boolean isLast) {
-        File dir = getDirectoryFile();
+        File dir = new File(Constant.ROOT);
         if (dir.exists()) {
             if (dir.isDirectory()) {
                 File file = new File(dir, fileName);
@@ -50,15 +46,15 @@ public class FileUtils {
     }
 
     public void writeToCalculatedDataFile(String textToWrite) {
-        writeToFile(textToWrite, ACCEL_FUNCS_FILE_NAME, false);
+        writeToFile(textToWrite, Constant.ACCEL_FUNCS_FILE_NAME, false);
     }
 
     public void writeToRawFile(String textToWrite) {
         try {
-            File dir = getDirectoryFile();
+            File dir = new File(Constant.ROOT);
             if (dir.exists()) {
                 if (dir.isDirectory()) {
-                    File file = new File(dir, RAW_FILE_NAME);
+                    File file = new File(dir, Constant.RAW_FILE_NAME);
                     FileWriter fileWriter = new FileWriter(file, true);
                     BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
                     writer.append(textToWrite);
@@ -70,7 +66,7 @@ public class FileUtils {
             else {
                 boolean success = dir.mkdirs();
                 if (success) {
-                    File file = new File(dir, RAW_FILE_NAME);
+                    File file = new File(dir, Constant.RAW_FILE_NAME);
                     FileWriter fileWriter = new FileWriter(file, true);
                     BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
                     writer.append(textToWrite);
@@ -84,7 +80,7 @@ public class FileUtils {
     }
 
     public void writeLastData(String textToWrite) {
-        writeToFile(textToWrite, ACCEL_FUNCS_FILE_NAME, true);
+        writeToFile(textToWrite, Constant.ACCEL_FUNCS_FILE_NAME, true);
     }
 
     private void fileWriter(String textToWrite, File file, boolean isLast) {
@@ -113,8 +109,7 @@ public class FileUtils {
     }
 
     public String getRawData() {
-        File root = Environment.getExternalStorageDirectory();
-        String filePath = root.getAbsolutePath() + "/" + FileUtils.FOLDER_NAME + "/" + FileUtils.RAW_FILE_NAME;
+        String filePath = Constant.RAW_PATH;
 
         String value = "";
         File myFile = new File(filePath);

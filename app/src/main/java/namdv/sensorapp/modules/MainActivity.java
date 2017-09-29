@@ -25,6 +25,7 @@ import java.util.Date;
 import namdv.sensorapp.R;
 import namdv.sensorapp.utils.WekaUtils;
 import namdv.sensorapp.utils.data.SimpleAccelData;
+import namdv.sensorapp.utils.file.FileUtils;
 
 enum State {
     BEGIN,
@@ -86,7 +87,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void initTextViewStatusCreateModel() {
-        
+        if (FileUtils.fileUtils.createdModel()) {
+            layoutVehicle.setVisibility(View.VISIBLE);
+            tvStatusCreateModel.setText("Model is already created.\nClick 'Create Model' button to re-create model.");
+            state = State.CREATED_MODEL;
+        }
     }
 
     private void initData() {
@@ -133,6 +138,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onClick(View v) {
         if (v == btnCreateModel)
         {
+            if (state == State.STOPPED)
+            {
+                stopMonitoring();
+                state = State.BEGIN;
+            }
             if (state == State.BEGIN || state == State.CREATED_MODEL) {
                 state = State.CREATING_MODEL;
                 new SaveDataTask().execute(createModel);
@@ -140,23 +150,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         else if (v == btnStartMonitoringVehicle)
         {
-            //TODO: start monitoring
-        }
-        else if (v == btnStopMonitoringVehicle) {
-            //TODO: stop monitoring, show dialog
-        }
-        else if (v == btnStopMonitoringActivity) {
-            //TODO: stop monitoring
-        }
-        if (state == State.BEGIN) {
-
-        } else if (state == State.CREATED_MODEL || state == State.STOPPED) {
             tvResultVehicle.setText(R.string.monitoring);
             registerSensor();
             state = State.MONITORING_VEHICLE;
-        } else if (state == State.MONITORING) {
+        }
+        else if (v == btnStopMonitoringVehicle) {
+            //TODO: stop monitoring, show dialog
             stopMonitoring();
             state = State.STOPPED;
+        }
+        else if (v == btnStopMonitoringActivity) {
+            //TODO: stop monitoring
         }
     }
 
@@ -164,8 +168,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         manager.unregisterListener(MainActivity.this);
         refreshData();
         WekaUtils.shared.resetPrediction();
-        tvStatus.setText(R.string.stopped);
-        tvResult.setVisibility(View.INVISIBLE);
+        tvResultVehicle.setText(R.string.stopped);
     }
 
     private void refreshData() {
@@ -257,16 +260,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         protected void onPreExecute()
         {
             super.onPreExecute();
-            tvStatus.setText(R.string.creating_model);
+            tvStatusCreateModel.setText(R.string.creating_model);
         }
 
         @Override
         protected void onPostExecute(Void aVoid)
         {
             super.onPostExecute(aVoid);
-            tvStatus.setText("Created model!!\n");
-            button.setText(R.string.monitor_data);
+            tvStatusCreateModel.setText("Created model!!\n");
             state = State.CREATED_MODEL;
+            layoutVehicle.setVisibility(View.VISIBLE);
         }
     }
 
@@ -290,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         protected void onPostExecute(Void aVoid)
         {
             super.onPostExecute(aVoid);
-            tvResult.setText("Attempts: " + windowIndex + "\n" + WekaUtils.shared.getPrediction());
+            tvResultVehicle.setText("Attempts: " + windowIndex + "\n" + WekaUtils.shared.getPrediction());
             lastIndex = FREQUENCY * windowIndex / 2;
             windowIndex++;
 

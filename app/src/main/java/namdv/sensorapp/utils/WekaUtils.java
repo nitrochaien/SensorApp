@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import namdv.sensorapp.Constant;
 import namdv.sensorapp.utils.file.CSV2Arff;
 import namdv.sensorapp.utils.file.FileUtils;
 import weka.classifiers.Classifier;
@@ -37,10 +38,6 @@ public class WekaUtils
 {
     public static WekaUtils shared = new WekaUtils();
 
-    String root = Environment.getExternalStorageDirectory().getAbsolutePath() + "/" + FileUtils.FOLDER_NAME;
-    String arffPath = root + "/accel_funcs.arff";
-    String modelPath = root + "/model/random_forest.model";
-
     ArrayList<String> predictions = new ArrayList<>();
 
     public void createRandomForestModel() {
@@ -48,14 +45,14 @@ public class WekaUtils
         int numFolds = 10;
 
         try {
-            br = new BufferedReader(new FileReader(arffPath));
+            br = new BufferedReader(new FileReader(Constant.ARFF_PATH));
             Instances trainData = new Instances(br);
             trainData.setClassIndex(trainData.numAttributes() - 1);
 
             RandomForest rf = new RandomForest();
             rf.setNumTrees(50);
             rf.buildClassifier(trainData);
-            SerializationHelper.write(modelPath, rf);
+            SerializationHelper.write(Constant.MODEL_PATH, rf);
 
             Evaluation evaluation = new Evaluation(trainData);
             Random ran = new Random(1);
@@ -71,12 +68,10 @@ public class WekaUtils
     }
 
     public void convert() {
-        File root = Environment.getExternalStorageDirectory();
-        String rootPath1 = root.getAbsolutePath() + "/" + FileUtils.FOLDER_NAME + "/" + FileUtils.ACCEL_FUNCS_FILE_NAME_ARFF;
-        String[] inputs1 = new String[2];
-        inputs1[0] = root.getAbsolutePath() + "/" + FileUtils.FOLDER_NAME + "/" + FileUtils.ACCEL_FUNCS_FILE_NAME;
-        inputs1[1] = rootPath1;
-        CSV2Arff.shared.convert(inputs1);
+        String[] inputs = new String[2];
+        inputs[0] = Constant.CSV_PATH;
+        inputs[1] = Constant.ARFF_PATH;;
+        CSV2Arff.shared.convert(inputs);
     }
 
     public void testModel(String input) {
@@ -104,7 +99,7 @@ public class WekaUtils
             System.out.println(dataRaw);
             System.out.println("--------------------------");
 
-            Classifier cls = (RandomForest)SerializationHelper.read(modelPath);
+            Classifier cls = (RandomForest)SerializationHelper.read(Constant.MODEL_PATH);
             dataRaw.setClassIndex(dataRaw.numAttributes() - 1);
 
             double predictValue = cls.classifyInstance(dataRaw.instance(0));
