@@ -1,13 +1,16 @@
 package namdv.sensorapp.modules;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -89,14 +92,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void initTextViewStatusCreateModel() {
         if (FileUtils.fileUtils.createdModel()) {
             layoutVehicle.setVisibility(View.VISIBLE);
-            tvStatusCreateModel.setText("Model is already created.\nClick 'Create Model' button to re-create model.");
+            tvStatusCreateModel.setText("Model is already created.\nClick 'Create Model' button to re-create model." +
+                    "\nOr you can start monitoring now!");
             state = State.CREATED_MODEL;
-        }
+        } else
+            state = State.BEGIN;
     }
 
     private void initData() {
         manager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
-        state = State.BEGIN;
     }
 
     @Override
@@ -107,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             return;
         }
 
-        int newIndex = FREQUENCY * windowIndex;
+        int newIndex = lastIndex + FREQUENCY;
         if (currentSize > newIndex) {
             windowList.clear();
             windowList.addAll(currentList.subList(lastIndex, newIndex));
@@ -150,17 +154,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         else if (v == btnStartMonitoringVehicle)
         {
-            tvResultVehicle.setText(R.string.monitoring);
-            registerSensor();
-            state = State.MONITORING_VEHICLE;
+            if (state == State.CREATED_MODEL || state == State.STOPPED) {
+                tvResultVehicle.setText(R.string.monitoring);
+                registerSensor();
+                state = State.MONITORING_VEHICLE;
+            }
         }
         else if (v == btnStopMonitoringVehicle) {
-            //TODO: stop monitoring, show dialog
-            stopMonitoring();
-            state = State.STOPPED;
+            if (state == State.MONITORING_VEHICLE) {
+                stopMonitoring();
+                state = State.STOPPED;
+            }
         }
         else if (v == btnStopMonitoringActivity) {
-            //TODO: stop monitoring
+            if (state == State.MONITORING_ACTIVITY) {
+                state = State.STOPPED;
+            }
         }
     }
 
@@ -168,7 +177,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         manager.unregisterListener(MainActivity.this);
         refreshData();
         WekaUtils.shared.resetPrediction();
-        tvResultVehicle.setText(R.string.stopped);
     }
 
     private void refreshData() {
@@ -233,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         protected void onPreExecute()
         {
             super.onPreExecute();
-            tvStatus.setText(R.string.saving_data);
+            tvStatusCreateModel.setText(R.string.saving_data);
         }
 
         @Override
@@ -242,6 +250,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             super.onPostExecute(aVoid);
             new SaveModelTask().execute(createModel);
         }
+    }
+
+    private void showAlert() {
+        AlertDialog.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
+        } else {
+            builder = new AlertDialog.Builder(this);
+        }
+        builder.setTitle("DONE!!")
+                .setMessage("Continue monitoring to define activity type?")
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        layoutActivity.setVisibility(View.VISIBLE);
+                        state = State.MONITORING_ACTIVITY;
+                    }
+                })
+                .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        //do nothing
+                    }
+                })
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     private class SaveModelTask extends AsyncTask <CreateModelHelper, Void, Void>
@@ -293,13 +325,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         protected void onPostExecute(Void aVoid)
         {
             super.onPostExecute(aVoid);
-            tvResultVehicle.setText("Attempts: " + windowIndex + "\n" + WekaUtils.shared.getPrediction());
-            lastIndex = FREQUENCY * windowIndex / 2;
-            windowIndex++;
-
+            String prediction = WekaUtils.shared.getPrediction().toUpperCase();
             if (state == State.STOPPED) {
+                tvResultVehicle.setText("Stopped monitoring!\nResult is: " + prediction);
+                showAlert();
                 return;
             }
+
+            tvResultVehicle.setText("Attempts: " + windowIndex + "\n" + prediction);
+            lastIndex = FREQUENCY * windowIndex / 2;
+            windowIndex++;
 
             new Handler().postDelayed(new Runnable() {
                 @Override
