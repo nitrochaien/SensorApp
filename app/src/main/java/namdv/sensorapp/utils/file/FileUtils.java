@@ -22,7 +22,14 @@ public class FileUtils {
     public static FileUtils fileUtils = new FileUtils();
 
     public boolean createdModel() {
-        return new File(Constant.ROOT).exists();
+        return new File(Constant.ROOT_MODEL).exists();
+    }
+
+    public void createModelFolder() {
+        File f = new File(Constant.ROOT_MODEL);
+        if (f.exists() || f.isDirectory())
+            return;
+        f.mkdirs();
     }
 
     private void writeToFile(String text, String fileName, boolean isLast) {
@@ -132,38 +139,13 @@ public class FileUtils {
     }
 
     public void writeAllTitles() {
-        writeToCalculatedDataFile("meanX");
-        writeToCalculatedDataFile("meanY");
-        writeToCalculatedDataFile("meanZ");
-        writeToCalculatedDataFile("meanXYZ");
-        writeToCalculatedDataFile("variance");
-        writeToCalculatedDataFile("averageGravity");
-        writeToCalculatedDataFile("horizontalAccels");
-        writeToCalculatedDataFile("verticalAccels");
-        writeToCalculatedDataFile("RMS");
-        writeToCalculatedDataFile("relative");
-        writeToCalculatedDataFile("sma");
-        writeToCalculatedDataFile("horizontalEnergy");
-        writeToCalculatedDataFile("verticalEnergy");
-        writeToCalculatedDataFile("vectorSVM");
-        writeToCalculatedDataFile("dsvm");
-        writeToCalculatedDataFile("dsvmByRMS");
-        writeToCalculatedDataFile("activity");
-        writeToCalculatedDataFile("mobility");
-        writeToCalculatedDataFile("complexity");
-
-        writeToCalculatedDataFile("fourier");
-        writeToCalculatedDataFile("xFFTEnergy");
-        writeToCalculatedDataFile("yFFTEnergy");
-        writeToCalculatedDataFile("zFFTEnergy");
-        writeToCalculatedDataFile("meanFFTEnergy");
-        writeToCalculatedDataFile("xFFTEntropy");
-        writeToCalculatedDataFile("yFFTEntropy");
-        writeToCalculatedDataFile("zFFTEntropy");
-        writeToCalculatedDataFile("meanFFTEntropy");
-        writeToCalculatedDataFile("devX");
-        writeToCalculatedDataFile("devY");
-        writeToCalculatedDataFile("devZ");
+        writeToCalculatedDataFile("meanX" + "," + "meanY" + "," + "meanZ" + "," + "meanXYZ" + "," +
+                "variance" + "," + "averageGravity" + "," + "horizontalAccels" + "," + "verticalAccels" + "," +
+                "RMS" + "," + "relative" + "," + "sma" + "," + "horizontalEnergy" + "," + "verticalEnergy" + "," +
+                "vectorSVM" + "," + "dsvm" + "," + "dsvmByRMS" + "," + "activity" + "," + "mobility" + "," + "complexity" + "," +
+                "fourier" + "," + "xFFTEnergy" + "," + "yFFTEnergy" + "," + "zFFTEnergy" + "," + "meanFFTEnergy" + "," +
+                "xFFTEntropy" + "," + "yFFTEntropy" + "," + "zFFTEntropy" + "," + "meanFFTEntropy" + "," + "devX" + "," +
+                "devY" + "," + "devZ");
 
         writeLastData("vehicle");
     }

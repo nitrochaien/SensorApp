@@ -293,6 +293,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         {
             super.onPreExecute();
             tvStatusCreateModel.setText(R.string.creating_model);
+            FileUtils.fileUtils.createModelFolder();
         }
 
         @Override
