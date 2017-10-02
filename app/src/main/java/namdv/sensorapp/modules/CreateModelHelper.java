@@ -6,11 +6,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import namdv.sensorapp.Constant;
 import namdv.sensorapp.utils.WekaUtils;
 import namdv.sensorapp.utils.data.AccelData;
 import namdv.sensorapp.utils.data.SimpleAccelData;
 import namdv.sensorapp.utils.data.WindowData;
-import namdv.sensorapp.utils.features.SensorFunctions;
+import namdv.sensorapp.utils.features.AccelFunctions;
+import namdv.sensorapp.utils.features.BikeFunctions;
+import namdv.sensorapp.utils.file.CSV2Arff;
 import namdv.sensorapp.utils.file.FileUtils;
 
 /**
@@ -22,6 +25,8 @@ public class CreateModelHelper
     private Context context;
     private ArrayList<AccelData> accels = new ArrayList<>();
 
+    private ArrayList<AccelData> bikeActivities = new ArrayList<>();
+
     public CreateModelHelper(Context context) {
         this.context = context;
     }
@@ -32,13 +37,25 @@ public class CreateModelHelper
     public void getAssetsFiles(String folderName) {
         try {
             String[] list = context.getAssets().list(folderName);
-            for (String file : list) {
-                if (!file.contains(".csv"))
-                    break;
-                String data = FileUtils.fileUtils.getAccelDataInFolder(context, folderName, file);
-                String[] dataLines = data.split("\n");
-                if (folderName.equals("Accel"))
+            if (folderName.equals("Accel"))
+            {
+                for (String file : list) {
+                    if (!file.contains(".csv"))
+                        break;
+                    String data = FileUtils.fileUtils.getAccelDataInFolder(context, folderName, file);
+                    String[] dataLines = data.split("\n");
+
+                    //save vehicle
                     saveAccels(dataLines);
+
+                    //save activity
+                    String[] split = file.split("_");
+                    String vehicleType = split[7];
+                    System.out.println("Vehicle type: " + vehicleType);
+                    if (vehicleType.equals("Bike")) {
+                        saveBikeActivities(dataLines);
+                    }
+                }
             }
         } catch (IOException e)
         {
@@ -51,6 +68,11 @@ public class CreateModelHelper
         accels.add(record);
     }
 
+    private void saveBikeActivities(String[] data) {
+        AccelData record = getSingleRecord(data);
+        bikeActivities.add(record);
+    }
+
     private AccelData getSingleRecord(String[] data) {
         if (data.length == 0)
             return new AccelData();
@@ -58,6 +80,7 @@ public class CreateModelHelper
         //Separate header
         String vehicle = data[2];
         String status = data[3];
+        status = validStatus(status);
 
         //Get body
         ArrayList<String> body = new ArrayList<>();
@@ -74,7 +97,7 @@ public class CreateModelHelper
     }
 
     public void calculateAccel() {
-        FileUtils.fileUtils.writeAllTitles();
+        FileUtils.fileUtils.writeAccelTitles();
 
         for (AccelData accel : accels) {
             WindowData wd = accel.data;
@@ -83,7 +106,7 @@ public class CreateModelHelper
             String vehicle = accel.getVehicle();
 
             for (int i = 0; i < count; i++) {
-                SensorFunctions func = new SensorFunctions(vehicle, status);
+                AccelFunctions func = new AccelFunctions(vehicle, status);
                 ArrayList<SimpleAccelData> data = wd.getAt(i);
 
                 func.saveMean(data);
@@ -95,9 +118,50 @@ public class CreateModelHelper
                 func.saveSMA(data);
                 func.saveHjorthFeatures(data);
                 func.saveFourier(wd, i);
+                func.addAttributeVehicle();
             }
         }
-        WekaUtils.shared.convert();
-        WekaUtils.shared.createRandomForestModel();
+        accels.clear();
+        CSV2Arff.shared.convert(new String[] { Constant.CSV_PATH, Constant.ARFF_PATH });
+        WekaUtils.shared.createRandomForestModel(Constant.ARFF_PATH, Constant.MODEL_PATH);
+        System.out.println("Created accel model!!!");
+    }
+
+    public void calculateBikeActivity() {
+        FileUtils.fileUtils.writeActivityTitles();
+
+        for (AccelData bike : bikeActivities) {
+            WindowData wd = bike.data;
+            int count = wd.getSize();
+            String status = bike.getStatus();
+            String vehicle = bike.getVehicle();
+
+            for (int i = 0; i < count; i++) {
+                BikeFunctions func = new BikeFunctions(vehicle, status);
+                ArrayList<SimpleAccelData> data = wd.getAt(i);
+
+                func.saveMean(data);
+                func.saveVariance(data);
+                func.saveGravity(data);
+                func.saveAccels(data);
+                func.saveRMS(data);
+                func.saveRelativeFeature(data);
+                func.saveSMA(data);
+                func.saveHjorthFeatures(data);
+                func.saveFourier(wd, i);
+                func.addAttributeActivity();
+            }
+        }
+        bikeActivities.clear();
+        CSV2Arff.shared.convert(new String[] { Constant.BIKE_PATH_CSV, Constant.BIKE_PATH_ARFF});
+        WekaUtils.shared.createRandomForestModel(Constant.BIKE_PATH_ARFF, Constant.BIKE_MODEL_PATH);
+    }
+
+    private String validStatus(String input) {
+        if (input.equals("S")) return "Stop";
+        if (input.equals("L")) return "Left";
+        if (input.equals("R")) return "Right";
+        if (input.equals("M") || input.equals("Mov")) return "Moving";
+        return input;
     }
 }

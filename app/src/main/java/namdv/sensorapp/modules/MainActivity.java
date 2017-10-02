@@ -25,6 +25,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Date;
 
+import namdv.sensorapp.Constant;
 import namdv.sensorapp.R;
 import namdv.sensorapp.utils.WekaUtils;
 import namdv.sensorapp.utils.data.SimpleAccelData;
@@ -115,7 +116,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (currentSize > newIndex) {
             windowList.clear();
             windowList.addAll(currentList.subList(lastIndex, newIndex));
-            new MonitoringDataTask().execute();
+            if (state == State.MONITORING_VEHICLE)
+                new MonitoringDataTask().execute();
+            else if (state == State.MONITORING_ACTIVITY)
+                new MonitoringActivityTask().execute();
         }
 
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -156,8 +160,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         {
             if (state == State.CREATED_MODEL || state == State.STOPPED) {
                 tvResultVehicle.setText(R.string.monitoring);
-                registerSensor();
                 state = State.MONITORING_VEHICLE;
+                registerSensor();
             }
         }
         else if (v == btnStopMonitoringVehicle) {
@@ -168,7 +172,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         else if (v == btnStopMonitoringActivity) {
             if (state == State.MONITORING_ACTIVITY) {
+                stopMonitoring();
                 state = State.STOPPED;
+            } else if (state == State.STOPPED) {
+                state = State.MONITORING_ACTIVITY;
+                btnStopMonitoringActivity.setText(R.string.stop);
+                registerSensor();
             }
         }
     }
@@ -176,7 +185,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void stopMonitoring() {
         manager.unregisterListener(MainActivity.this);
         refreshData();
-        WekaUtils.shared.resetPrediction();
     }
 
     private void refreshData() {
@@ -248,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         protected void onPostExecute(Void aVoid)
         {
             super.onPostExecute(aVoid);
-            new SaveModelTask().execute(createModel);
+            new SaveModelAccelTask().execute(createModel);
         }
     }
 
@@ -265,6 +273,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     public void onClick(DialogInterface dialog, int which) {
                         layoutActivity.setVisibility(View.VISIBLE);
                         state = State.MONITORING_ACTIVITY;
+                        registerSensor();
                     }
                 })
                 .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -276,7 +285,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 .show();
     }
 
-    private class SaveModelTask extends AsyncTask <CreateModelHelper, Void, Void>
+    private class SaveModelAccelTask extends AsyncTask <CreateModelHelper, Void, Void>
     {
         @Override
         protected Void doInBackground(CreateModelHelper... params)
@@ -300,6 +309,32 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         protected void onPostExecute(Void aVoid)
         {
             super.onPostExecute(aVoid);
+            new SaveModelBikeTask().execute(createModel);
+        }
+    }
+
+    private class SaveModelBikeTask extends AsyncTask <CreateModelHelper, Void, Void>
+    {
+        @Override
+        protected Void doInBackground(CreateModelHelper... params)
+        {
+            CreateModelHelper helper = params[0];
+            if (helper != null) {
+                helper.calculateBikeActivity();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid)
+        {
+            super.onPostExecute(aVoid);
             tvStatusCreateModel.setText("Created model!!\n");
             state = State.CREATED_MODEL;
             layoutVehicle.setVisibility(View.VISIBLE);
@@ -310,7 +345,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         @Override
         protected Void doInBackground(Void... params)
         {
-            WekaUtils.shared.testModel(sFunction);
+            WekaUtils.shared.testModelVehicle(sFunction);
             return null;
         }
 
@@ -328,12 +363,52 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             super.onPostExecute(aVoid);
             String prediction = WekaUtils.shared.getPrediction().toUpperCase();
             if (state == State.STOPPED) {
-                tvResultVehicle.setText("Stopped monitoring!\nResult is: " + prediction);
+                tvResultVehicle.setText("Stopped monitoring vehicle!!!");
                 showAlert();
                 return;
             }
 
             tvResultVehicle.setText("Attempts: " + windowIndex + "\n" + prediction);
+            lastIndex = FREQUENCY * windowIndex / 2;
+            windowIndex++;
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    registerSensor();
+                }
+            }, 100);
+        }
+    }
+
+    private class MonitoringActivityTask extends AsyncTask <Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params)
+        {
+            WekaUtils.shared.testModelBike(sFunction);
+            return null;
+        }
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+            manager.unregisterListener(MainActivity.this);
+            sFunction = testModel.calculateFunctions(windowList);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid)
+        {
+            super.onPostExecute(aVoid);
+            String prediction = WekaUtils.shared.getPrediction().toUpperCase();
+            if (state == State.STOPPED) {
+                tvResultActivity.setText("Stopped monitoring activity!!!");
+                btnStopMonitoringActivity.setText(R.string.start);
+                return;
+            }
+
+            tvResultActivity.setText("Attempts: " + windowIndex + "\n" + prediction);
             lastIndex = FREQUENCY * windowIndex / 2;
             windowIndex++;
 

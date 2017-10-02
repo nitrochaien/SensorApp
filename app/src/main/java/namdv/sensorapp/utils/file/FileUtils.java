@@ -2,11 +2,9 @@ package namdv.sensorapp.utils.file;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.os.Environment;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -56,38 +54,16 @@ public class FileUtils {
         writeToFile(textToWrite, Constant.ACCEL_FUNCS_FILE_NAME, false);
     }
 
-    public void writeToRawFile(String textToWrite) {
-        try {
-            File dir = new File(Constant.ROOT);
-            if (dir.exists()) {
-                if (dir.isDirectory()) {
-                    File file = new File(dir, Constant.RAW_FILE_NAME);
-                    FileWriter fileWriter = new FileWriter(file, true);
-                    BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
-                    writer.append(textToWrite);
-                    writer.close();
-                } else {
-                    System.out.println("Not a directory");
-                }
-            }
-            else {
-                boolean success = dir.mkdirs();
-                if (success) {
-                    File file = new File(dir, Constant.RAW_FILE_NAME);
-                    FileWriter fileWriter = new FileWriter(file, true);
-                    BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
-                    writer.append(textToWrite);
-                    writer.close();
-                } else
-                    System.out.println("Cant make directory");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void writeLastData(String textToWrite) {
         writeToFile(textToWrite, Constant.ACCEL_FUNCS_FILE_NAME, true);
+    }
+
+    public void writeToBikeFile(String textToWrite) {
+        writeToFile(textToWrite, Constant.BIKE_FILE_NAME, false);
+    }
+
+    public void writeLastDataBikeFile(String textToWrite) {
+        writeToFile(textToWrite, Constant.BIKE_FILE_NAME, true);
     }
 
     private void fileWriter(String textToWrite, File file, boolean isLast) {
@@ -115,30 +91,12 @@ public class FileUtils {
         }
     }
 
-    public String getRawData() {
-        String filePath = Constant.RAW_PATH;
-
-        String value = "";
-        File myFile = new File(filePath);
-        try {
-            FileInputStream fis = new FileInputStream(myFile);
-            byte[] dataArray = new byte[fis.available()];
-            while (fis.read(dataArray) != -1) {
-                value = new String(dataArray);
-            }
-            fis.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return value;
-    }
-
     private String convertStreamToString(InputStream is) {
         java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
     }
 
-    public void writeAllTitles() {
+    public void writeAccelTitles() {
         writeToCalculatedDataFile("meanX" + "," + "meanY" + "," + "meanZ" + "," + "meanXYZ" + "," +
                 "variance" + "," + "averageGravity" + "," + "horizontalAccels" + "," + "verticalAccels" + "," +
                 "RMS" + "," + "relative" + "," + "sma" + "," + "horizontalEnergy" + "," + "verticalEnergy" + "," +
@@ -148,6 +106,18 @@ public class FileUtils {
                 "devY" + "," + "devZ");
 
         writeLastData("vehicle");
+    }
+
+    public void writeActivityTitles() {
+        writeToBikeFile("meanX" + "," + "meanY" + "," + "meanZ" + "," + "meanXYZ" + "," +
+                "variance" + "," + "averageGravity" + "," + "horizontalAccels" + "," + "verticalAccels" + "," +
+                "RMS" + "," + "relative" + "," + "sma" + "," + "horizontalEnergy" + "," + "verticalEnergy" + "," +
+                "vectorSVM" + "," + "dsvm" + "," + "dsvmByRMS" + "," + "activity" + "," + "mobility" + "," + "complexity" + "," +
+                "fourier" + "," + "xFFTEnergy" + "," + "yFFTEnergy" + "," + "zFFTEnergy" + "," + "meanFFTEnergy" + "," +
+                "xFFTEntropy" + "," + "yFFTEntropy" + "," + "zFFTEntropy" + "," + "meanFFTEntropy" + "," + "devX" + "," +
+                "devY" + "," + "devZ");
+
+        writeLastDataBikeFile("vehicle" + ",status");
     }
 
     public String getMyModelPath(Context context) {
