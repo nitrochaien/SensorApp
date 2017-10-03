@@ -66,6 +66,22 @@ public class FileUtils {
         writeToFile(textToWrite, Constant.BIKE_FILE_NAME, true);
     }
 
+    public void writeToCarFile(String textToWrite) {
+        writeToFile(textToWrite, Constant.CAR_FILE_NAME, false);
+    }
+
+    public void writeLastDataCarFile(String textToWrite) {
+        writeToFile(textToWrite, Constant.CAR_FILE_NAME, true);
+    }
+
+    public void writeToMotoFile(String textToWrite) {
+        writeToFile(textToWrite, Constant.MOTO_FILE_NAME, false);
+    }
+
+    public void writeLastDataMotoFile(String textToWrite) {
+        writeToFile(textToWrite, Constant.MOTO_FILE_NAME, true);
+    }
+
     private void fileWriter(String textToWrite, File file, boolean isLast) {
         if (file == null) return;
         try {
@@ -108,7 +124,7 @@ public class FileUtils {
         writeLastData("vehicle");
     }
 
-    public void writeActivityTitles() {
+    public void writeBikeTitles() {
         writeToBikeFile("meanX" + "," + "meanY" + "," + "meanZ" + "," + "meanXYZ" + "," +
                 "variance" + "," + "averageGravity" + "," + "horizontalAccels" + "," + "verticalAccels" + "," +
                 "RMS" + "," + "relative" + "," + "sma" + "," + "horizontalEnergy" + "," + "verticalEnergy" + "," +
@@ -118,6 +134,30 @@ public class FileUtils {
                 "devY" + "," + "devZ");
 
         writeLastDataBikeFile("vehicle" + ",status");
+    }
+
+    public void writeCarTitles() {
+        writeToCarFile("meanX" + "," + "meanY" + "," + "meanZ" + "," + "meanXYZ" + "," +
+                "variance" + "," + "averageGravity" + "," + "horizontalAccels" + "," + "verticalAccels" + "," +
+                "RMS" + "," + "relative" + "," + "sma" + "," + "horizontalEnergy" + "," + "verticalEnergy" + "," +
+                "vectorSVM" + "," + "dsvm" + "," + "dsvmByRMS" + "," + "activity" + "," + "mobility" + "," + "complexity" + "," +
+                "fourier" + "," + "xFFTEnergy" + "," + "yFFTEnergy" + "," + "zFFTEnergy" + "," + "meanFFTEnergy" + "," +
+                "xFFTEntropy" + "," + "yFFTEntropy" + "," + "zFFTEntropy" + "," + "meanFFTEntropy" + "," + "devX" + "," +
+                "devY" + "," + "devZ");
+
+        writeLastDataCarFile("vehicle" + ",status");
+    }
+
+    public void writeMotoTitles() {
+        writeToMotoFile("meanX" + "," + "meanY" + "," + "meanZ" + "," + "meanXYZ" + "," +
+                "variance" + "," + "averageGravity" + "," + "horizontalAccels" + "," + "verticalAccels" + "," +
+                "RMS" + "," + "relative" + "," + "sma" + "," + "horizontalEnergy" + "," + "verticalEnergy" + "," +
+                "vectorSVM" + "," + "dsvm" + "," + "dsvmByRMS" + "," + "activity" + "," + "mobility" + "," + "complexity" + "," +
+                "fourier" + "," + "xFFTEnergy" + "," + "yFFTEnergy" + "," + "zFFTEnergy" + "," + "meanFFTEnergy" + "," +
+                "xFFTEntropy" + "," + "yFFTEntropy" + "," + "zFFTEntropy" + "," + "meanFFTEntropy" + "," + "devX" + "," +
+                "devY" + "," + "devZ");
+
+        writeLastDataMotoFile("vehicle" + ",status");
     }
 
     public String getMyModelPath(Context context) {

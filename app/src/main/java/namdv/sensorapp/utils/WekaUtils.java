@@ -141,6 +141,80 @@ public class WekaUtils
         }
     }
 
+    public void testModelCar(String input) {
+        try {
+            ArrayList<Attribute> attributes = attributeActivitySet();
+            String[] split = input.split(",");
+            if (split.length == 0)
+                return;
+
+            Instances dataRaw = new Instances("accels_func", attributes, 0);
+            double[] value = new double[dataRaw.numAttributes()];
+            for (int i = 0; i < split.length; i++) {
+                if (i == split.length - 1) {
+                    value[i] = Utils.missingValue();
+                } else {
+                    String val = split[i];
+                    float in = isNumeric(val) ? Float.parseFloat(val) : 0;
+                    value[i] = in;
+                }
+            }
+            dataRaw.add(new DenseInstance(1.0, value));
+
+//            System.out.println("After adding a instance");
+            System.out.println("--------------------------");
+            System.out.println(dataRaw);
+            System.out.println("--------------------------");
+
+            Classifier cls = (RandomForest)SerializationHelper.read(Constant.CAR_MODEL_PATH);
+            dataRaw.setClassIndex(dataRaw.numAttributes() - 1);
+
+            double predictValue = cls.classifyInstance(dataRaw.instance(0));
+            currentPrediction = dataRaw.classAttribute().value((int)predictValue);
+            System.out.println("The predicted value is: " + currentPrediction);
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    public void testModelMoto(String input) {
+        try {
+            ArrayList<Attribute> attributes = attributeActivitySet();
+            String[] split = input.split(",");
+            if (split.length == 0)
+                return;
+
+            Instances dataRaw = new Instances("accels_func", attributes, 0);
+            double[] value = new double[dataRaw.numAttributes()];
+            for (int i = 0; i < split.length; i++) {
+                if (i == split.length - 1) {
+                    value[i] = Utils.missingValue();
+                } else {
+                    String val = split[i];
+                    float in = isNumeric(val) ? Float.parseFloat(val) : 0;
+                    value[i] = in;
+                }
+            }
+            dataRaw.add(new DenseInstance(1.0, value));
+
+//            System.out.println("After adding a instance");
+            System.out.println("--------------------------");
+            System.out.println(dataRaw);
+            System.out.println("--------------------------");
+
+            Classifier cls = (RandomForest)SerializationHelper.read(Constant.MOTO_MODEL_PATH);
+            dataRaw.setClassIndex(dataRaw.numAttributes() - 1);
+
+            double predictValue = cls.classifyInstance(dataRaw.instance(0));
+            currentPrediction = dataRaw.classAttribute().value((int)predictValue);
+            System.out.println("The predicted value is: " + currentPrediction);
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
     public String getPrediction() {
         return currentPrediction;
     }
@@ -151,6 +225,7 @@ public class WekaUtils
         ArrayList<String> classifyVal = new ArrayList<>();
         classifyVal.add("Car");
         classifyVal.add("Bike");
+        classifyVal.add("Moto");
 
         attributes.add(new Attribute("meanX"));
         attributes.add(new Attribute("meanY"));
@@ -194,6 +269,7 @@ public class WekaUtils
         ArrayList<String> vehicles = new ArrayList<>();
         vehicles.add("Car");
         vehicles.add("Bike");
+        vehicles.add("Moto");
 
         ArrayList<String> activities = new ArrayList<>();
         activities.add("Moving");

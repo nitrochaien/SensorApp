@@ -13,6 +13,8 @@ import namdv.sensorapp.utils.data.SimpleAccelData;
 import namdv.sensorapp.utils.data.WindowData;
 import namdv.sensorapp.utils.features.AccelFunctions;
 import namdv.sensorapp.utils.features.BikeFunctions;
+import namdv.sensorapp.utils.features.CarFunctions;
+import namdv.sensorapp.utils.features.MotoFunctions;
 import namdv.sensorapp.utils.file.CSV2Arff;
 import namdv.sensorapp.utils.file.FileUtils;
 
@@ -26,6 +28,8 @@ public class CreateModelHelper
     private ArrayList<AccelData> accels = new ArrayList<>();
 
     private ArrayList<AccelData> bikeActivities = new ArrayList<>();
+    private ArrayList<AccelData> carActivities = new ArrayList<>();
+    private ArrayList<AccelData> motoActivities = new ArrayList<>();
 
     public CreateModelHelper(Context context) {
         this.context = context;
@@ -52,8 +56,17 @@ public class CreateModelHelper
                     String[] split = file.split("_");
                     String vehicleType = split[7];
                     System.out.println("Vehicle type: " + vehicleType);
-                    if (vehicleType.equals("Bike")) {
-                        saveBikeActivities(dataLines);
+                    switch (vehicleType)
+                    {
+                        case "Bike":
+                            saveBikeActivities(dataLines);
+                            break;
+                        case "Car":
+                            saveCarActivities(dataLines);
+                            break;
+                        case "Moto":
+                            saveMotoActivities(dataLines);
+                            break;
                     }
                 }
             }
@@ -71,6 +84,16 @@ public class CreateModelHelper
     private void saveBikeActivities(String[] data) {
         AccelData record = getSingleRecord(data);
         bikeActivities.add(record);
+    }
+
+    private void saveCarActivities(String[] data) {
+        AccelData record = getSingleRecord(data);
+        carActivities.add(record);
+    }
+
+    private void saveMotoActivities(String[] data) {
+        AccelData record = getSingleRecord(data);
+        motoActivities.add(record);
     }
 
     private AccelData getSingleRecord(String[] data) {
@@ -128,7 +151,7 @@ public class CreateModelHelper
     }
 
     public void calculateBikeActivity() {
-        FileUtils.fileUtils.writeActivityTitles();
+        FileUtils.fileUtils.writeBikeTitles();
 
         for (AccelData bike : bikeActivities) {
             WindowData wd = bike.data;
@@ -155,6 +178,66 @@ public class CreateModelHelper
         bikeActivities.clear();
         CSV2Arff.shared.convert(new String[] { Constant.BIKE_PATH_CSV, Constant.BIKE_PATH_ARFF});
         WekaUtils.shared.createRandomForestModel(Constant.BIKE_PATH_ARFF, Constant.BIKE_MODEL_PATH);
+    }
+
+    public void calculateCarActivity() {
+        FileUtils.fileUtils.writeCarTitles();
+
+        for (AccelData car : carActivities) {
+            WindowData wd = car.data;
+            int count = wd.getSize();
+            String status = car.getStatus();
+            String vehicle = car.getVehicle();
+
+            for (int i = 0; i < count; i++) {
+                CarFunctions func = new CarFunctions(vehicle, status);
+                ArrayList<SimpleAccelData> data = wd.getAt(i);
+
+                func.saveMean(data);
+                func.saveVariance(data);
+                func.saveGravity(data);
+                func.saveAccels(data);
+                func.saveRMS(data);
+                func.saveRelativeFeature(data);
+                func.saveSMA(data);
+                func.saveHjorthFeatures(data);
+                func.saveFourier(wd, i);
+                func.addAttributeActivity();
+            }
+        }
+        carActivities.clear();
+        CSV2Arff.shared.convert(new String[] { Constant.CAR_PATH_CSV, Constant.CAR_PATH_ARFF});
+        WekaUtils.shared.createRandomForestModel(Constant.CAR_PATH_ARFF, Constant.CAR_MODEL_PATH);
+    }
+
+    public void calculateMotoActivity() {
+        FileUtils.fileUtils.writeMotoTitles();
+
+        for (AccelData moto : motoActivities) {
+            WindowData wd = moto.data;
+            int count = wd.getSize();
+            String status = moto.getStatus();
+            String vehicle = moto.getVehicle();
+
+            for (int i = 0; i < count; i++) {
+                MotoFunctions func = new MotoFunctions(vehicle, status);
+                ArrayList<SimpleAccelData> data = wd.getAt(i);
+
+                func.saveMean(data);
+                func.saveVariance(data);
+                func.saveGravity(data);
+                func.saveAccels(data);
+                func.saveRMS(data);
+                func.saveRelativeFeature(data);
+                func.saveSMA(data);
+                func.saveHjorthFeatures(data);
+                func.saveFourier(wd, i);
+                func.addAttributeActivity();
+            }
+        }
+        motoActivities.clear();
+        CSV2Arff.shared.convert(new String[] { Constant.MOTO_PATH_CSV, Constant.MOTO_PATH_ARFF});
+        WekaUtils.shared.createRandomForestModel(Constant.MOTO_PATH_ARFF, Constant.MOTO_MODEL_PATH);
     }
 
     private String validStatus(String input) {
