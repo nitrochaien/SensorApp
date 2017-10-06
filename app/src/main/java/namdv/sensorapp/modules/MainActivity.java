@@ -180,13 +180,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         else if (v == btnStopMonitoringVehicle) {
             if (state == State.MONITORING_VEHICLE) {
                 stopMonitoring();
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //Your code to run in GUI thread here
+                        String prediction = WekaUtils.shared.getPrediction().toUpperCase();
+                        String result = "Stopped monitoring vehicle!!!\n Result is: " + prediction;
+                        tvResultVehicle.setText(result);
+                        lastVehicleRecord = prediction;
+                        showAlert();
+                    }
+                });
                 state = State.STOPPED;
             }
         }
         else if (v == btnStopMonitoringActivity) {
             if (state == State.MONITORING_ACTIVITY) {
-                stopMonitoring();
                 state = State.STOPPED;
+                stopMonitoring();
             } else if (state == State.STOPPED) {
                 state = State.MONITORING_ACTIVITY;
                 btnStopMonitoringActivity.setText(R.string.stop);
@@ -286,6 +297,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     public void onClick(DialogInterface dialog, int which) {
                         state = State.MONITORING_ACTIVITY;
                         layoutActivity.setVisibility(View.VISIBLE);
+                        btnStopMonitoringActivity.setText(R.string.stop);
                         registerSensor();
                     }
                 })
@@ -414,10 +426,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             super.onPostExecute(aVoid);
             String prediction = WekaUtils.shared.getPrediction().toUpperCase();
             if (state == State.STOPPED) {
-                String result = "Stopped monitoring vehicle!!!\n Result is: " + prediction;
-                tvResultVehicle.setText(result);
-                lastVehicleRecord = prediction;
-                showAlert();
                 return;
             }
 
@@ -454,11 +462,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         protected void onPostExecute(Void aVoid)
         {
             super.onPostExecute(aVoid);
-            String prediction = WekaUtils.shared.getPrediction().toUpperCase();
+            final String prediction = WekaUtils.shared.getPrediction().toUpperCase();
             if (state == State.STOPPED) {
-                String result = "Stopped monitoring activity!!!\n Result is: " + prediction;
-                tvResultActivity.setText(result);
-                btnStopMonitoringActivity.setText(R.string.start);
+                showResultActivity(prediction);
                 return;
             }
 
@@ -497,9 +503,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             super.onPostExecute(aVoid);
             String prediction = WekaUtils.shared.getPrediction().toUpperCase();
             if (state == State.STOPPED) {
-                String result = "Stopped monitoring activity!!!\n Result is: " + prediction;
-                tvResultActivity.setText(result);
-                btnStopMonitoringActivity.setText(R.string.start);
+                showResultActivity(prediction);
                 return;
             }
 
@@ -538,9 +542,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             super.onPostExecute(aVoid);
             String prediction = WekaUtils.shared.getPrediction().toUpperCase();
             if (state == State.STOPPED) {
-                String result = "Stopped monitoring activity!!!\n Result is: " + prediction;
-                tvResultActivity.setText(result);
-                btnStopMonitoringActivity.setText(R.string.start);
+                showResultActivity(prediction);
                 return;
             }
 
@@ -555,5 +557,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
             }, 100);
         }
+    }
+
+    private void showResultActivity(final String prediction) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                //Your code to run in GUI thread here
+                String result = "Stopped monitoring activity!!!\n Result is: " + prediction;
+                tvResultActivity.setText(result);
+                btnStopMonitoringActivity.setText(R.string.start);
+            }
+        });
     }
 }
