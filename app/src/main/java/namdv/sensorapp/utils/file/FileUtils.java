@@ -2,15 +2,15 @@ package namdv.sensorapp.utils.file;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.os.Environment;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+
+import namdv.sensorapp.Constant;
 
 /**
  * Created by namdv on 5/30/17.
@@ -19,18 +19,19 @@ import java.io.InputStream;
 public class FileUtils {
     public static FileUtils fileUtils = new FileUtils();
 
-    public static final String ACCEL_FUNCS_FILE_NAME = "accel_funcs.csv";
-    public static final String RAW_FILE_NAME = "raw_file.csv";
-    public static final String ACCEL_FUNCS_FILE_NAME_ARFF = "accel_funcs.arff";
-    public static final String FOLDER_NAME = "Accelerometer";
+    public boolean createdModel() {
+        return new File(Constant.ROOT_MODEL).exists();
+    }
 
-    private File getDirectoryFile() {
-        File root = Environment.getExternalStorageDirectory();
-        return new File(root.getAbsolutePath() + "/" + FOLDER_NAME);
+    public void createModelFolder() {
+        File f = new File(Constant.ROOT_MODEL);
+        if (f.exists() || f.isDirectory())
+            return;
+        f.mkdirs();
     }
 
     private void writeToFile(String text, String fileName, boolean isLast) {
-        File dir = getDirectoryFile();
+        File dir = new File(Constant.ROOT);
         if (dir.exists()) {
             if (dir.isDirectory()) {
                 File file = new File(dir, fileName);
@@ -50,41 +51,35 @@ public class FileUtils {
     }
 
     public void writeToCalculatedDataFile(String textToWrite) {
-        writeToFile(textToWrite, ACCEL_FUNCS_FILE_NAME, false);
-    }
-
-    public void writeToRawFile(String textToWrite) {
-        try {
-            File dir = getDirectoryFile();
-            if (dir.exists()) {
-                if (dir.isDirectory()) {
-                    File file = new File(dir, RAW_FILE_NAME);
-                    FileWriter fileWriter = new FileWriter(file, true);
-                    BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
-                    writer.append(textToWrite);
-                    writer.close();
-                } else {
-                    System.out.println("Not a directory");
-                }
-            }
-            else {
-                boolean success = dir.mkdirs();
-                if (success) {
-                    File file = new File(dir, RAW_FILE_NAME);
-                    FileWriter fileWriter = new FileWriter(file, true);
-                    BufferedWriter writer = new BufferedWriter(fileWriter, 1024);
-                    writer.append(textToWrite);
-                    writer.close();
-                } else
-                    System.out.println("Cant make directory");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        writeToFile(textToWrite, Constant.ACCEL_FUNCS_FILE_NAME, false);
     }
 
     public void writeLastData(String textToWrite) {
-        writeToFile(textToWrite, ACCEL_FUNCS_FILE_NAME, true);
+        writeToFile(textToWrite, Constant.ACCEL_FUNCS_FILE_NAME, true);
+    }
+
+    public void writeToBikeFile(String textToWrite) {
+        writeToFile(textToWrite, Constant.BIKE_FILE_NAME, false);
+    }
+
+    public void writeLastDataBikeFile(String textToWrite) {
+        writeToFile(textToWrite, Constant.BIKE_FILE_NAME, true);
+    }
+
+    public void writeToCarFile(String textToWrite) {
+        writeToFile(textToWrite, Constant.CAR_FILE_NAME, false);
+    }
+
+    public void writeLastDataCarFile(String textToWrite) {
+        writeToFile(textToWrite, Constant.CAR_FILE_NAME, true);
+    }
+
+    public void writeToMotoFile(String textToWrite) {
+        writeToFile(textToWrite, Constant.MOTO_FILE_NAME, false);
+    }
+
+    public void writeLastDataMotoFile(String textToWrite) {
+        writeToFile(textToWrite, Constant.MOTO_FILE_NAME, true);
     }
 
     private void fileWriter(String textToWrite, File file, boolean isLast) {
@@ -112,78 +107,57 @@ public class FileUtils {
         }
     }
 
-    public String getRawData() {
-        File root = Environment.getExternalStorageDirectory();
-        String filePath = root.getAbsolutePath() + "/" + FileUtils.FOLDER_NAME + "/" + FileUtils.RAW_FILE_NAME;
-
-        String value = "";
-        File myFile = new File(filePath);
-        try {
-            FileInputStream fis = new FileInputStream(myFile);
-            byte[] dataArray = new byte[fis.available()];
-            while (fis.read(dataArray) != -1) {
-                value = new String(dataArray);
-            }
-            fis.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return value;
-    }
-
     private String convertStreamToString(InputStream is) {
         java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
     }
 
-    private void writeFeaturesTitle() {
-        writeToCalculatedDataFile("averageGravity");
-        writeToCalculatedDataFile("horizontalAccels");
-        writeToCalculatedDataFile("verticalAccels");
-        writeToCalculatedDataFile("RMS");
-        writeToCalculatedDataFile("relative");
-        writeToCalculatedDataFile("sma");
-        writeToCalculatedDataFile("horizontalEnergy");
-        writeToCalculatedDataFile("verticalEnergy");
-        writeToCalculatedDataFile("vectorSVM");
-        writeToCalculatedDataFile("dsvm");
-        writeToCalculatedDataFile("dsvmByRMS");
-        writeToCalculatedDataFile("activity");
-        writeToCalculatedDataFile("mobility");
-        writeToCalculatedDataFile("complexity");
-    }
+    public void writeAccelTitles() {
+        writeToCalculatedDataFile("meanX" + "," + "meanY" + "," + "meanZ" + "," + "meanXYZ" + "," +
+                "variance" + "," + "averageGravity" + "," + "horizontalAccels" + "," + "verticalAccels" + "," +
+                "RMS" + "," + "relative" + "," + "sma" + "," + "horizontalEnergy" + "," + "verticalEnergy" + "," +
+                "vectorSVM" + "," + "dsvm" + "," + "dsvmByRMS" + "," + "activity" + "," + "mobility" + "," + "complexity" + "," +
+                "fourier" + "," + "xFFTEnergy" + "," + "yFFTEnergy" + "," + "zFFTEnergy" + "," + "meanFFTEnergy" + "," +
+                "xFFTEntropy" + "," + "yFFTEntropy" + "," + "zFFTEntropy" + "," + "meanFFTEntropy" + "," + "devX" + "," +
+                "devY" + "," + "devZ");
 
-    private void writeFourierTitle() {
-        writeToCalculatedDataFile("fourier");
-        writeToCalculatedDataFile("xFFTEnergy");
-        writeToCalculatedDataFile("yFFTEnergy");
-        writeToCalculatedDataFile("zFFTEnergy");
-        writeToCalculatedDataFile("meanFFTEnergy");
-        writeToCalculatedDataFile("xFFTEntropy");
-        writeToCalculatedDataFile("yFFTEntropy");
-        writeToCalculatedDataFile("zFFTEntropy");
-        writeToCalculatedDataFile("meanFFTEntropy");
-        writeToCalculatedDataFile("devX");
-        writeToCalculatedDataFile("devY");
-        writeToCalculatedDataFile("devZ");
-
-        //vehicle
         writeLastData("vehicle");
     }
 
-    public void writeAccelTitle() {
-        writeFeaturesTitle();
-        writeFourierTitle();
+    public void writeBikeTitles() {
+        writeToBikeFile("meanX" + "," + "meanY" + "," + "meanZ" + "," + "meanXYZ" + "," +
+                "variance" + "," + "averageGravity" + "," + "horizontalAccels" + "," + "verticalAccels" + "," +
+                "RMS" + "," + "relative" + "," + "sma" + "," + "horizontalEnergy" + "," + "verticalEnergy" + "," +
+                "vectorSVM" + "," + "dsvm" + "," + "dsvmByRMS" + "," + "activity" + "," + "mobility" + "," + "complexity" + "," +
+                "fourier" + "," + "xFFTEnergy" + "," + "yFFTEnergy" + "," + "zFFTEnergy" + "," + "meanFFTEnergy" + "," +
+                "xFFTEntropy" + "," + "yFFTEntropy" + "," + "zFFTEntropy" + "," + "meanFFTEntropy" + "," + "devX" + "," +
+                "devY" + "," + "devZ");
+
+        writeLastDataBikeFile("vehicle" + ",status");
     }
 
-    public void writeAllTitles() {
-        writeToCalculatedDataFile("meanX");
-        writeToCalculatedDataFile("meanY");
-        writeToCalculatedDataFile("meanZ");
-        writeToCalculatedDataFile("meanXYZ");
-        writeToCalculatedDataFile("variance");
+    public void writeCarTitles() {
+        writeToCarFile("meanX" + "," + "meanY" + "," + "meanZ" + "," + "meanXYZ" + "," +
+                "variance" + "," + "averageGravity" + "," + "horizontalAccels" + "," + "verticalAccels" + "," +
+                "RMS" + "," + "relative" + "," + "sma" + "," + "horizontalEnergy" + "," + "verticalEnergy" + "," +
+                "vectorSVM" + "," + "dsvm" + "," + "dsvmByRMS" + "," + "activity" + "," + "mobility" + "," + "complexity" + "," +
+                "fourier" + "," + "xFFTEnergy" + "," + "yFFTEnergy" + "," + "zFFTEnergy" + "," + "meanFFTEnergy" + "," +
+                "xFFTEntropy" + "," + "yFFTEntropy" + "," + "zFFTEntropy" + "," + "meanFFTEntropy" + "," + "devX" + "," +
+                "devY" + "," + "devZ");
 
-        writeAccelTitle();
+        writeLastDataCarFile("vehicle" + ",status");
+    }
+
+    public void writeMotoTitles() {
+        writeToMotoFile("meanX" + "," + "meanY" + "," + "meanZ" + "," + "meanXYZ" + "," +
+                "variance" + "," + "averageGravity" + "," + "horizontalAccels" + "," + "verticalAccels" + "," +
+                "RMS" + "," + "relative" + "," + "sma" + "," + "horizontalEnergy" + "," + "verticalEnergy" + "," +
+                "vectorSVM" + "," + "dsvm" + "," + "dsvmByRMS" + "," + "activity" + "," + "mobility" + "," + "complexity" + "," +
+                "fourier" + "," + "xFFTEnergy" + "," + "yFFTEnergy" + "," + "zFFTEnergy" + "," + "meanFFTEnergy" + "," +
+                "xFFTEntropy" + "," + "yFFTEntropy" + "," + "zFFTEntropy" + "," + "meanFFTEntropy" + "," + "devX" + "," +
+                "devY" + "," + "devZ");
+
+        writeLastDataMotoFile("vehicle" + ",status");
     }
 
     public String getMyModelPath(Context context) {

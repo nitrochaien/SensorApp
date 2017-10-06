@@ -1,8 +1,11 @@
 <resources>
     <string name="app_name">SensorApp</string>
     <string name="save">Save</string>
+    <string name="start">Start</string>
     <string name="stop">Stop</string>
     <string name="begin">Begin</string>
+    <string name="create_model">Create Model</string>
+    <string name="model_is_created_intro">Model is already created.\n Click `Create Model` button to re-create model.\n Or you can start monitoring now!</string>
     <string name="get_info">Get Info</string>
     <string name="calculate_fnc">Calculate Accel</string>
     <string name="calculate_gyro">Calculate Gyro</string>
@@ -10,6 +13,7 @@
     <string name="monitoring">Monitoring…</string>
     <string name="monitor_data">Monitor data</string>
     <string name="stopped">Stopped!</string>
+    <string name="stopped_monitoring_activity">Stopped monitoring activity!!!</string>
     <string name="calculate_fourier">Calculate Fourier</string>
     <string name="random_forest">Random Forest</string>
     <string name="saving_data">Saving data… Please wait…</string>
