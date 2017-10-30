@@ -425,11 +425,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         {
             super.onPostExecute(aVoid);
             String prediction = WekaUtils.shared.getPrediction().toUpperCase();
+            final double prob = WekaUtils.shared.getProb();
             if (state == State.STOPPED) {
                 return;
             }
 
-            tvResultVehicle.setText("Attempts: " + windowIndex + "\n" + prediction);
+            tvResultVehicle.setText("Attempts: " + windowIndex + "\n" + prediction + " / " + prob + "%");
             lastIndex = FREQUENCY * windowIndex / 2;
             windowIndex++;
 
@@ -463,12 +464,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         {
             super.onPostExecute(aVoid);
             final String prediction = WekaUtils.shared.getPrediction().toUpperCase();
+            final double prob = WekaUtils.shared.getProb();
             if (state == State.STOPPED) {
                 showResultActivity(prediction);
                 return;
             }
 
-            tvResultActivity.setText("Attempts: " + windowIndex + "\n" + prediction);
+            tvResultActivity.setText("Attempts: " + windowIndex + "\n" + prediction + " / " + prob + "%");
             lastIndex = FREQUENCY * windowIndex / 2;
             windowIndex++;
 
@@ -502,12 +504,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         {
             super.onPostExecute(aVoid);
             String prediction = WekaUtils.shared.getPrediction().toUpperCase();
+            final double prob = WekaUtils.shared.getProb();
             if (state == State.STOPPED) {
                 showResultActivity(prediction);
                 return;
             }
 
-            tvResultActivity.setText("Attempts: " + windowIndex + "\n" + prediction);
+            tvResultActivity.setText("Attempts: " + windowIndex + "\n" + prediction + " / " + prob + "%");
             lastIndex = FREQUENCY * windowIndex / 2;
             windowIndex++;
 
@@ -541,12 +544,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         {
             super.onPostExecute(aVoid);
             String prediction = WekaUtils.shared.getPrediction().toUpperCase();
+            final double prob = WekaUtils.shared.getProb();
             if (state == State.STOPPED) {
                 showResultActivity(prediction);
                 return;
             }
 
-            tvResultActivity.setText("Attempts: " + windowIndex + "\n" + prediction);
+            tvResultActivity.setText("Attempts: " + windowIndex + "\n" + prediction + " / " + prob + "%");
             lastIndex = FREQUENCY * windowIndex / 2;
             windowIndex++;
 

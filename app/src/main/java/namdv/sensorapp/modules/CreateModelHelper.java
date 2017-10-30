@@ -147,7 +147,6 @@ public class CreateModelHelper
         accels.clear();
         CSV2Arff.shared.convert(new String[] { Constant.CSV_PATH, Constant.ARFF_PATH });
         WekaUtils.shared.createRandomForestModel(Constant.ARFF_PATH, Constant.MODEL_PATH);
-        System.out.println("Created accel model!!!");
     }
 
     public void calculateBikeActivity() {

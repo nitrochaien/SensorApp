@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,7 @@ public class WekaUtils
     public static WekaUtils shared = new WekaUtils();
 
     String currentPrediction = "";
+    double maxProb = 0;
 
     public void createRandomForestModel(String arffPath, String modelPath) {
         BufferedReader br;
@@ -98,6 +100,8 @@ public class WekaUtils
             double predictValue = cls.classifyInstance(dataRaw.instance(0));
             currentPrediction = dataRaw.classAttribute().value((int)predictValue);
             System.out.println("The predicted value is: " + currentPrediction);
+            double[] probability = cls.distributionForInstance(dataRaw.instance(0));
+            maxProb = maxValue(probability) * 100;
         } catch (Exception e)
         {
             e.printStackTrace();
@@ -135,6 +139,8 @@ public class WekaUtils
             double predictValue = cls.classifyInstance(dataRaw.instance(0));
             currentPrediction = dataRaw.classAttribute().value((int)predictValue);
             System.out.println("The predicted value is: " + currentPrediction);
+            double[] probability = cls.distributionForInstance(dataRaw.instance(0));
+            maxProb = maxValue(probability) * 100;
         } catch (Exception e)
         {
             e.printStackTrace();
@@ -172,6 +178,8 @@ public class WekaUtils
             double predictValue = cls.classifyInstance(dataRaw.instance(0));
             currentPrediction = dataRaw.classAttribute().value((int)predictValue);
             System.out.println("The predicted value is: " + currentPrediction);
+            double[] probability = cls.distributionForInstance(dataRaw.instance(0));
+            maxProb = maxValue(probability) * 100;
         } catch (Exception e)
         {
             e.printStackTrace();
@@ -209,6 +217,8 @@ public class WekaUtils
             double predictValue = cls.classifyInstance(dataRaw.instance(0));
             currentPrediction = dataRaw.classAttribute().value((int)predictValue);
             System.out.println("The predicted value is: " + currentPrediction);
+            double[] probability = cls.distributionForInstance(dataRaw.instance(0));
+            maxProb = maxValue(probability) * 100;
         } catch (Exception e)
         {
             e.printStackTrace();
@@ -217,6 +227,10 @@ public class WekaUtils
 
     public String getPrediction() {
         return currentPrediction;
+    }
+
+    public double getProb() {
+        return maxProb;
     }
 
     public ArrayList<Attribute> attributeSet() {
@@ -326,5 +340,18 @@ public class WekaUtils
             return false;
         }
         return true;
+    }
+
+    public double maxValue(double[] decMax){
+        double max = 0;
+        for (int counter = 1; counter < decMax.length; counter++)
+        {
+            if (decMax[counter] > max)
+            {
+                max = decMax[counter];
+            }
+        }
+
+        return max;
     }
 }
