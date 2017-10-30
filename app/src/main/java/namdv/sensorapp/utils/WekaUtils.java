@@ -10,6 +10,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -101,7 +103,8 @@ public class WekaUtils
             currentPrediction = dataRaw.classAttribute().value((int)predictValue);
             System.out.println("The predicted value is: " + currentPrediction);
             double[] probability = cls.distributionForInstance(dataRaw.instance(0));
-            maxProb = maxValue(probability) * 100;
+            double validProb = round(maxValue(probability),2);
+            maxProb = validProb * 100;
         } catch (Exception e)
         {
             e.printStackTrace();
@@ -140,7 +143,8 @@ public class WekaUtils
             currentPrediction = dataRaw.classAttribute().value((int)predictValue);
             System.out.println("The predicted value is: " + currentPrediction);
             double[] probability = cls.distributionForInstance(dataRaw.instance(0));
-            maxProb = maxValue(probability) * 100;
+            double validProb = round(maxValue(probability),2);
+            maxProb = validProb * 100;
         } catch (Exception e)
         {
             e.printStackTrace();
@@ -179,7 +183,8 @@ public class WekaUtils
             currentPrediction = dataRaw.classAttribute().value((int)predictValue);
             System.out.println("The predicted value is: " + currentPrediction);
             double[] probability = cls.distributionForInstance(dataRaw.instance(0));
-            maxProb = maxValue(probability) * 100;
+            double validProb = round(maxValue(probability),2);
+            maxProb = validProb * 100;
         } catch (Exception e)
         {
             e.printStackTrace();
@@ -218,7 +223,8 @@ public class WekaUtils
             currentPrediction = dataRaw.classAttribute().value((int)predictValue);
             System.out.println("The predicted value is: " + currentPrediction);
             double[] probability = cls.distributionForInstance(dataRaw.instance(0));
-            maxProb = maxValue(probability) * 100;
+            double validProb = round(maxValue(probability),2);
+            maxProb = validProb * 100;
         } catch (Exception e)
         {
             e.printStackTrace();
@@ -342,7 +348,7 @@ public class WekaUtils
         return true;
     }
 
-    public double maxValue(double[] decMax){
+    private double maxValue(double[] decMax){
         double max = 0;
         for (int counter = 1; counter < decMax.length; counter++)
         {
@@ -353,5 +359,13 @@ public class WekaUtils
         }
 
         return max;
+    }
+
+    private double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 }
