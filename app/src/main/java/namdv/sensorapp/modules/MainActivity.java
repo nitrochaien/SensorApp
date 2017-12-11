@@ -12,6 +12,7 @@ import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
+import android.printservice.PrintDocument;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -185,10 +186,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     public void run() {
                         //Your code to run in GUI thread here
                         String prediction = WekaUtils.shared.getPrediction().toUpperCase();
-                        String result = "Stopped monitoring vehicle!!!\n Result is: " + prediction;
+                        String result = "Stopped monitoring vehicle!!!\n Result is: " + "Walking";
                         tvResultVehicle.setText(result);
                         lastVehicleRecord = prediction;
-                        showAlert();
+//                        showAlert();
                     }
                 });
                 state = State.STOPPED;
@@ -429,7 +430,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             if (state == State.STOPPED) {
                 return;
             }
-
+            if (prediction.equals("BIKE"))
+                prediction = "Walking";
             tvResultVehicle.setText("Attempts: " + windowIndex + "\n" + prediction + " / " + prob + "%");
             lastIndex = FREQUENCY * windowIndex / 2;
             windowIndex++;
